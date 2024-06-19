@@ -30,6 +30,7 @@ export default function Index() {
 
 
   return (
+    
     <div className="flex flex-col bg-white border shadow-sm rounded-xl p-4 md:p-5">
         <h3 className="text-lg font-bold text-gray-800">
             Card title
