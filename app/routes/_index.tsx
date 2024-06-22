@@ -1,8 +1,8 @@
 import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import { json } from "@remix-run/node"; 
-import { useLoaderData, useNavigate, useSearchParams } from "@remix-run/react";
+import { json, useLoaderData, useNavigate, useSearchParams } from "@remix-run/react";
 import { createCookie } from "@remix-run/node";
 import React, { useState } from 'react';
+
 
 export const meta: MetaFunction = () => {
   return [
@@ -31,7 +31,6 @@ export const loader = async ({
 };
 
 
-
 export default function Index() {
   const data = useLoaderData<typeof loader>();
   const navigate = useNavigate();
@@ -49,73 +48,45 @@ const setM = (money: number) => {
 
 
   return (
-    <div className="font-sans p-4">
-      <button onClick={() => setM(money)}>
-        Add
-      </button>
-      {money}
-      <div>
-      <button onClick={() => setIsOpen((open) => !open)}>
-        {isOpen ? "閉じる" : "開く"}
-      </button>
-      <aside hidden={!isOpen}><p>aaaa</p></aside>
-    </div>
-
-
-      <div>
-      <div>
-        <button
-          onClick={() => {
-            setView("list");
-            navigate(`?view=list`);
-          }}
-        >
-          リストとして表示
-        </button>
-        <button
-          onClick={() => {
-            setView("details");
-            navigate(`?view=details`);
-          }}
-        >
-          詳細を表示
-        </button>
+<div className="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
+  <div className="grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
+    <a className="group flex flex-col bg-white border shadow-sm rounded-xl hover:shadow-md transition" href="#">
+      <div className="p-4 md:p-5">
+        <div className="flex justify-between items-center">
+          <div>
+            <h3 className="group-hover:text-blue-600 font-semibold text-gray-800">
+              Management
+            </h3>
+            <p className="text-sm text-gray-500">
+              4 job positions
+            </p>
+          </div>
+          <div className="ps-3">
+            <svg className="flex-shrink-0 size-5 text-gray-800" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </div>
+        </div>
       </div>
-      {data.view === "list" ? <p>list</p> : <p>detail</p>}
-    </div>
-      <h1 className="text-3xl">Welcome to Remix</h1>
-      <ul className="list-disc mt-4 pl-6 space-y-2">
-        <li>
-          <a
-            className="text-blue-700 underline visited:text-purple-900"
-            target="_blank"
-            href="https://remix.run/start/quickstart"
-            rel="noreferrer"
-          >
-            5m Quick Start | {data.date} | {console.log('front log')} {console.debug('front debug')}
-          </a>
-        </li>
-        <li>
-          <a
-            className="text-blue-700 underline visited:text-purple-900"
-            target="_blank"
-            href="https://remix.run/start/tutorial"
-            rel="noreferrer"
-          >
-            30m Tutorial
-          </a>
-        </li>
-        <li>
-          <a
-            className="text-blue-700 underline visited:text-purple-900"
-            target="_blank"
-            href="https://remix.run/docs"
-            rel="noreferrer"
-          >
-            Remix Docs
-          </a>
-        </li>
-      </ul>
-    </div>
+    </a>
+  
+    <a className="group flex flex-col bg-white border shadow-sm rounded-xl hover:shadow-md transition" href="#">
+      <div className="p-4 md:p-5">
+        <div className="flex justify-between items-center">
+          <div>
+            <h3 className="group-hover:text-blue-600 font-semibold text-gray-800">
+              App Development
+            </h3>
+            <p className="text-sm text-gray-500">
+              26 job positions
+            </p>
+          </div>
+          <div className="ps-3">
+            <svg className="flex-shrink-0 size-5 text-gray-800" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>
+
   );
 }
