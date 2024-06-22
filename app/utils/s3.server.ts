@@ -1,48 +1,49 @@
 import { PassThrough } from "stream";
-
 import type { UploadHandler } from "@remix-run/node";
 import { writeAsyncIterableToWritable } from "@remix-run/node";
-import AWS from "aws-sdk";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { Upload } from "@aws-sdk/lib-storage";
 
-const { STORAGE_ACCESS_KEY, STORAGE_SECRET, STORAGE_REGION, STORAGE_BUCKET, STORAGE_ENDPOINT } =
-  process.env;
+const { STORAGE_ACCESS_KEY, STORAGE_SECRET, STORAGE_REGION, STORAGE_BUCKET, STORAGE_ENDPOINT } = process.env;
 
-if (
-  !(STORAGE_ACCESS_KEY && STORAGE_SECRET && STORAGE_REGION && STORAGE_BUCKET && STORAGE_ENDPOINT)
-) {
-  throw new Error(`Storage is missing required configuration.`);
+if (!(STORAGE_ACCESS_KEY && STORAGE_SECRET && STORAGE_REGION && STORAGE_BUCKET && STORAGE_ENDPOINT)) {
+  throw new Error("Storageに必要な設定がありません。");
 }
 
-const uploadStream = ({ Key }: Pick<AWS.S3.Types.PutObjectRequest, "Key">) => {
-  const s3 = new AWS.S3({
-    credentials: {
-      accessKeyId: STORAGE_ACCESS_KEY,
-      secretAccessKey: STORAGE_SECRET,
-    },
-    region: STORAGE_REGION,
-    endpoint: STORAGE_ENDPOINT
-  });
+const s3Client = new S3Client({
+  credentials: {
+    accessKeyId: STORAGE_ACCESS_KEY,
+    secretAccessKey: STORAGE_SECRET,
+  },
+  region: STORAGE_REGION,
+  endpoint: STORAGE_ENDPOINT,
+});
+
+const uploadStream = ({ Key }: { Key: string }) => {
   const pass = new PassThrough();
+  const upload = new Upload({
+    client: s3Client,
+    params: {
+      Bucket: STORAGE_BUCKET,
+      Key,
+      Body: pass,
+    },
+  });
+  
   return {
     writeStream: pass,
-    promise: s3.upload({ Bucket: STORAGE_BUCKET, Key, Body: pass }).promise(),
+    promise: upload.done(),
   };
 };
 
-export async function uploadStreamToS3(data: any, filename: string) {
-  const stream = uploadStream({
-    Key: filename,
-  });
+export async function uploadStreamToS3(data: AsyncIterable<Uint8Array>, filename: string) {
+  const stream = uploadStream({ Key: filename });
   await writeAsyncIterableToWritable(data, stream.writeStream);
   const file = await stream.promise;
   return file.Location;
 }
 
-export const s3UploadHandler: UploadHandler = async ({
-  name,
-  filename,
-  data,
-}) => {
+export const s3UploadHandler: UploadHandler = async ({ name, filename, data }) => {
   if (name !== "img") {
     return undefined;
   }
