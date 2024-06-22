@@ -27,6 +27,7 @@ type ActionData = {
   errorMsg?: string;
   imgSrc?: string;
   imgDesc?: string;
+  status?: string;
 };
 
 export const loader = async ({
@@ -47,16 +48,16 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   );
   const formData = await parseMultipartFormData(request, uploadHandler);
   const imgSrc = formData.get("img");
-  const imgDesc = formData.get("desc");
-  console.log(imgDesc);
+
   if (!imgSrc) {
     return json({
+      status:"error",
       errorMsg: "Something went wrong while uploading",
     });
   }
   return json({
+    status:"success",
     imgSrc,
-    imgDesc,
   });
 };
 
@@ -64,12 +65,13 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
 export default function Index() {
   const fetcher = useFetcher<ActionData>();
-
+  const isError = fetcher.data?.status === "error"
+  const isSuccess = fetcher.data?.status === "success"
 
   return (
 <div className="max-w-4xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
       <div className="bg-white rounded-xl shadow p-4 sm:p-7">
-        <form>
+
           <div className="grid sm:grid-cols-12 gap-2 sm:gap-4 py-8 first:pt-0 last:pb-0 border-t first:border-transparent border-gray-200">
             <div className="sm:col-span-12">
               <h2 className="text-lg font-semibold text-gray-800">
@@ -77,45 +79,41 @@ export default function Index() {
               </h2>
             </div>
 
-            <fetcher.Form method="post" encType="multipart/form-data">
-        <label htmlFor="img-field">Image to upload</label>
-        <input id="img-field" type="file" name="img" accept="image/*" />
-        <label htmlFor="img-desc">Image description</label>
-        <input id="img-desc" type="text" name="desc" />
-        <button type="submit">Upload to S3</button>
-      </fetcher.Form>
-      {fetcher.type === "done" ? (
-        fetcher.data.errorMsg ? (
-          <h2>{fetcher.data.errorMsg}</h2>
-        ) : (
-          <>
-            <div>
-              File has been uploaded to S3 and is available under the following
-              URL (if the bucket has public access enabled):
-            </div>
-            <div>{fetcher.data.imgSrc}</div>
-            <img
-              src={fetcher.data.imgSrc}
-              alt={fetcher.data.imgDesc || "Uploaded image from S3"}
-            />
-          </>
-        )
-      ) : null}
 
 
-            <div className="sm:col-span-12">
-              <label htmlFor="af-submit-application-resume-cv" className="sr-only">Choose file</label>
-              <input type="file" name="af-submit-application-resume-cv" id="af-submit-application-resume-cv" className="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none
+    <div className="sm:col-span-12">
+      <fetcher.Form method="post" encType="multipart/form-data">
+        <input id="img-field" type="file" name="img" accept="image/*" className="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none
                 file:bg-gray-50 file:border-0
                 file:bg-gray-100 file:me-4
                 file:py-2 file:px-4
-               "></input>
-            </div>
-          </div>
-          <button type="button" className="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+               "/>
+
+        <button type="submit" className="w-full my-4 py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
         送信
       </button>
-        </form>
+      </fetcher.Form>
+      {isError && (
+
+          <h2>{fetcher.data?.errorMsg}</h2>
+
+      )}
+      {isSuccess && (
+        <>
+          <div>
+            アップロードが完了しました。
+          </div>
+          <div>{fetcher.data?.imgSrc}</div>
+          <img
+            src={fetcher.data?.imgSrc}
+            alt="Uploaded image from S3"
+          />
+        </>
+      )}
+    </div>
+
+          </div>
+          
       </div>
 
       </div>
