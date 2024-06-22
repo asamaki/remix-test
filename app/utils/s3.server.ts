@@ -1,8 +1,9 @@
 import { PassThrough } from "stream";
 import type { UploadHandler } from "@remix-run/node";
 import { writeAsyncIterableToWritable } from "@remix-run/node";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const { STORAGE_ACCESS_KEY, STORAGE_SECRET, STORAGE_REGION, STORAGE_BUCKET, STORAGE_ENDPOINT } = process.env;
 
@@ -36,11 +37,16 @@ const uploadStream = ({ Key }: { Key: string }) => {
   };
 };
 
-export async function uploadStreamToS3(data: AsyncIterable<Uint8Array>, filename: string) {
+async function uploadStreamToS3(data: AsyncIterable<Uint8Array>, filename: string) {
   const stream = uploadStream({ Key: filename });
   await writeAsyncIterableToWritable(data, stream.writeStream);
-  const file = await stream.promise;
-  return file.Location;
+  await stream.promise;
+  const location = await getSignedUrl(
+    s3Client,
+    new GetObjectCommand({ Bucket: STORAGE_BUCKET, Key: filename }),
+    { expiresIn: 3600 }
+  )
+  return location;
 }
 
 export const s3UploadHandler: UploadHandler = async ({ name, filename, data }) => {

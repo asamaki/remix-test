@@ -61,8 +61,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   });
 };
 
-
-
 export default function Index() {
   const fetcher = useFetcher<ActionData>();
   const isError = fetcher.data?.status === "error"
@@ -103,10 +101,10 @@ export default function Index() {
           <div>
             アップロードが完了しました。
           </div>
-          <div>{fetcher.data?.imgSrc}</div>
           <img
             src={fetcher.data?.imgSrc}
-            alt="Uploaded image from S3"
+            alt="Uploaded Image"
+            className="my-4"
           />
         </>
       )}
