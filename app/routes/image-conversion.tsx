@@ -79,17 +79,17 @@ export default function Index() {
 
 
 
-    <div className="sm:col-span-12">
-      <fetcher.Form method="post" encType="multipart/form-data">
-        <input id="img-field" type="file" name="img" accept="image/*" className="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none
-                file:bg-gray-50 file:border-0
-                file:bg-gray-100 file:me-4
-                file:py-2 file:px-4
-               "/>
+            <div className="sm:col-span-12">
+              <fetcher.Form method="post" encType="multipart/form-data">
+                <input id="img-field" type="file" name="img" accept="image/*" className="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none
+                        file:bg-gray-50 file:border-0
+                        file:bg-gray-100 file:me-4
+                        file:py-2 file:px-4
+                      "/>
 
-        <button type="submit" className="w-full my-4 py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
-        送信
-      </button>
+                <button type="submit" className="w-full my-4 py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+                送信
+              </button>
       </fetcher.Form>
       {isError && (
 
