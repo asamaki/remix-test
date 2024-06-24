@@ -5,6 +5,8 @@ export default function Index() {
   const [error, setError] = useState<string | null>(null);
   const [imgSrc, setImgSrc] = useState<string | null>(null);
   const [compressedImgSrc, setCompressedImgSrc] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false); // 追加
+  const [compressing, setCompressing] = useState<boolean>(false); // 追加
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const compressedFileRef = useRef<File | null>(null);
 
@@ -15,15 +17,17 @@ export default function Index() {
       setImgSrc(null);
       return;
     }
-
+    setLoading(true); // 追加
     const reader = new FileReader();
     reader.onloadend = () => {
       setImgSrc(reader.result as string);
       setError(null);
+      setLoading(false); // 追加
     };
     reader.onerror = () => {
       setError("ファイルの読み込みに失敗しました");
       setImgSrc(null);
+      setLoading(false); // 追加
     };
     reader.readAsDataURL(file);
   };
@@ -36,6 +40,7 @@ export default function Index() {
 
     const file = fileInputRef.current.files[0];
 
+    setCompressing(true); // 追加
     try {
       const options = {
         maxSizeMB: 1, // 最大サイズを1MBに設定
@@ -50,15 +55,18 @@ export default function Index() {
       reader.onloadend = () => {
         setCompressedImgSrc(reader.result as string);
         setError(null);
+        setCompressing(false); // 追加
       };
       reader.onerror = () => {
         setError("圧縮ファイルの読み込みに失敗しました");
         setCompressedImgSrc(null);
+        setCompressing(false); // 追加
       };
       reader.readAsDataURL(compressedFile);
     } catch (error) {
       setError("画像の圧縮に失敗しました");
       setCompressedImgSrc(null);
+      setCompressing(false); // 追加
     }
   };
 
@@ -87,19 +95,6 @@ export default function Index() {
                 </li>
               </ul>
 
-              {error ? <h2>{error}</h2> : null}
-              {imgSrc ? (
-                <>
-                  <h2>読み込まれた画像（アップロードされていません）</h2>
-                  <img
-                    className="my-4"
-                    alt="uploaded"
-                    src={imgSrc}
-                    style={{ maxWidth: "30%" }}
-                  />
-                </>
-              ) : null}
-
               <form>
                 <input
                   type="file"
@@ -113,13 +108,29 @@ export default function Index() {
                         file:py-2 file:px-4
                       "
                 />
-                <button
-                  type="button"
-                  onClick={handleCompress}
-                  className="w-full my-4 py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
-                >
-                  画像を圧縮（アップロードなし）
-                </button>
+                {error ? <h2>{error}</h2> : null}
+                {loading ? <p>画像を読み込み中...</p> : null} {/* 追加 */}
+                {imgSrc ? (
+                  <>
+                    <h2 className="mt-4">
+                      読み込まれた画像（アップロードされていません）
+                    </h2>
+                    <img
+                      className="my-4"
+                      alt="uploaded"
+                      src={imgSrc}
+                      style={{ maxWidth: "30%" }}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleCompress}
+                      className="w-full my-4 py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
+                    >
+                      画像を圧縮（アップロードなし）
+                    </button>
+                    {compressing ? <p>画像を圧縮中...</p> : null} {/* 追加 */}
+                  </>
+                ) : null}
               </form>
 
               {compressedImgSrc ? (
