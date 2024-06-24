@@ -83,6 +83,10 @@ export default function Index() {
               </h2>
             </div>
             <div className="sm:col-span-12">
+            <ul className="list-disc space-y-1 ps-5 text-md text-gray-800 mb-4">
+              <li className="ps-1">画像を圧縮できます。</li>
+              <li className="ps-1">アップロードは行われず、すべてブラウザで処理されます。</li>
+            </ul>
 
             {error ? <h2>{error}</h2> : null}
       {imgSrc ? (
