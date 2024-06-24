@@ -5,9 +5,23 @@ import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-const { STORAGE_ACCESS_KEY, STORAGE_SECRET, STORAGE_REGION, STORAGE_BUCKET, STORAGE_ENDPOINT } = process.env;
+const {
+  STORAGE_ACCESS_KEY,
+  STORAGE_SECRET,
+  STORAGE_REGION,
+  STORAGE_BUCKET,
+  STORAGE_ENDPOINT,
+} = process.env;
 
-if (!(STORAGE_ACCESS_KEY && STORAGE_SECRET && STORAGE_REGION && STORAGE_BUCKET && STORAGE_ENDPOINT)) {
+if (
+  !(
+    STORAGE_ACCESS_KEY &&
+    STORAGE_SECRET &&
+    STORAGE_REGION &&
+    STORAGE_BUCKET &&
+    STORAGE_ENDPOINT
+  )
+) {
   throw new Error("Storageに必要な設定がありません。");
 }
 
@@ -30,26 +44,33 @@ const uploadStream = ({ Key }: { Key: string }) => {
       Body: pass,
     },
   });
-  
+
   return {
     writeStream: pass,
     promise: upload.done(),
   };
 };
 
-async function uploadStreamToS3(data: AsyncIterable<Uint8Array>, filename: string) {
+async function uploadStreamToS3(
+  data: AsyncIterable<Uint8Array>,
+  filename: string,
+) {
   const stream = uploadStream({ Key: filename });
   await writeAsyncIterableToWritable(data, stream.writeStream);
   await stream.promise;
   const location = await getSignedUrl(
     s3Client,
     new GetObjectCommand({ Bucket: STORAGE_BUCKET, Key: filename }),
-    { expiresIn: 3600 }
-  )
+    { expiresIn: 3600 },
+  );
   return location;
 }
 
-export const s3UploadHandler: UploadHandler = async ({ name, filename, data }) => {
+export const s3UploadHandler: UploadHandler = async ({
+  name,
+  filename,
+  data,
+}) => {
   if (name !== "img") {
     return undefined;
   }
