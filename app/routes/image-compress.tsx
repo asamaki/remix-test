@@ -112,37 +112,41 @@ export default function Index() {
                 {error ? <h2>{error}</h2> : null}
                 {loading ? <p>画像を読み込み中...</p> : null}
 
-                <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700">最大サイズ（MB）</label>
-                  <input
-                    type="number"
-                    value={maxSizeMB}
-                    onChange={(e) => setMaxSizeMB(Number(e.target.value))}
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                  />
-                </div>
-
-                <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700">最大幅または高さ（px）</label>
-                  <input
-                    type="number"
-                    value={maxWidthOrHeight}
-                    onChange={(e) => setMaxWidthOrHeight(Number(e.target.value))}
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                  />
-                </div>
-
                 {imgSrc ? (
                   <>
-                    <h2 className="mt-4">
-                      読み込まれた画像（アップロードされていません）
-                    </h2>
+                    <h2 className="mt-4">読み込まれた画像</h2>
                     <img
                       className="my-4"
                       alt="uploaded"
                       src={imgSrc}
                       style={{ maxWidth: "30%" }}
                     />
+
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-700">
+                        最大サイズ（MB）
+                      </label>
+                      <input
+                        type="number"
+                        value={maxSizeMB}
+                        onChange={(e) => setMaxSizeMB(Number(e.target.value))}
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                      />
+                    </div>
+
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-700">
+                        最大幅または高さ（px）
+                      </label>
+                      <input
+                        type="number"
+                        value={maxWidthOrHeight}
+                        onChange={(e) =>
+                          setMaxWidthOrHeight(Number(e.target.value))
+                        }
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                      />
+                    </div>
                     <button
                       type="button"
                       onClick={handleCompress}
