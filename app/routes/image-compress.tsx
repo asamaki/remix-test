@@ -5,8 +5,10 @@ export default function Index() {
   const [error, setError] = useState<string | null>(null);
   const [imgSrc, setImgSrc] = useState<string | null>(null);
   const [compressedImgSrc, setCompressedImgSrc] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(false); // 追加
-  const [compressing, setCompressing] = useState<boolean>(false); // 追加
+  const [loading, setLoading] = useState<boolean>(false);
+  const [compressing, setCompressing] = useState<boolean>(false);
+  const [maxSizeMB, setMaxSizeMB] = useState<number>(1); // 追加
+  const [maxWidthOrHeight, setMaxWidthOrHeight] = useState<number>(800); // 追加
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const compressedFileRef = useRef<File | null>(null);
 
@@ -17,17 +19,17 @@ export default function Index() {
       setImgSrc(null);
       return;
     }
-    setLoading(true); // 追加
+    setLoading(true);
     const reader = new FileReader();
     reader.onloadend = () => {
       setImgSrc(reader.result as string);
       setError(null);
-      setLoading(false); // 追加
+      setLoading(false);
     };
     reader.onerror = () => {
       setError("ファイルの読み込みに失敗しました");
       setImgSrc(null);
-      setLoading(false); // 追加
+      setLoading(false);
     };
     reader.readAsDataURL(file);
   };
@@ -40,11 +42,11 @@ export default function Index() {
 
     const file = fileInputRef.current.files[0];
 
-    setCompressing(true); // 追加
     try {
+      setCompressing(true);
       const options = {
-        maxSizeMB: 1, // 最大サイズを1MBに設定
-        maxWidthOrHeight: 800, // 最大の幅または高さを800pxに設定
+        maxSizeMB: maxSizeMB, // フォームから取得
+        maxWidthOrHeight: maxWidthOrHeight, // フォームから取得
         useWebWorker: true,
       };
 
@@ -55,18 +57,17 @@ export default function Index() {
       reader.onloadend = () => {
         setCompressedImgSrc(reader.result as string);
         setError(null);
-        setCompressing(false); // 追加
       };
       reader.onerror = () => {
         setError("圧縮ファイルの読み込みに失敗しました");
         setCompressedImgSrc(null);
-        setCompressing(false); // 追加
       };
       reader.readAsDataURL(compressedFile);
     } catch (error) {
       setError("画像の圧縮に失敗しました");
       setCompressedImgSrc(null);
-      setCompressing(false); // 追加
+    } finally {
+      setCompressing(false);
     }
   };
 
@@ -109,7 +110,28 @@ export default function Index() {
                       "
                 />
                 {error ? <h2>{error}</h2> : null}
-                {loading ? <p>画像を読み込み中...</p> : null} {/* 追加 */}
+                {loading ? <p>画像を読み込み中...</p> : null}
+
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700">最大サイズ（MB）</label>
+                  <input
+                    type="number"
+                    value={maxSizeMB}
+                    onChange={(e) => setMaxSizeMB(Number(e.target.value))}
+                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                  />
+                </div>
+
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700">最大幅または高さ（px）</label>
+                  <input
+                    type="number"
+                    value={maxWidthOrHeight}
+                    onChange={(e) => setMaxWidthOrHeight(Number(e.target.value))}
+                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                  />
+                </div>
+
                 {imgSrc ? (
                   <>
                     <h2 className="mt-4">
@@ -128,7 +150,7 @@ export default function Index() {
                     >
                       画像を圧縮（アップロードなし）
                     </button>
-                    {compressing ? <p>画像を圧縮中...</p> : null} {/* 追加 */}
+                    {compressing ? <p>画像を圧縮中...</p> : null}
                   </>
                 ) : null}
               </form>
