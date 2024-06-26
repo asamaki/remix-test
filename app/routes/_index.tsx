@@ -52,7 +52,7 @@ export default function Index() {
       <div className="grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
         <a
           className="group flex flex-col bg-white border shadow-sm rounded-xl hover:shadow-md transition"
-          href="/image-conversion"
+          href="/image-compress"
         >
           <div className="p-4 md:p-5">
             <div className="flex justify-between items-center">
@@ -86,7 +86,7 @@ export default function Index() {
 
         <a
           className="group flex flex-col bg-white border shadow-sm rounded-xl hover:shadow-md transition"
-          href="#"
+          href="/image-conversion"
         >
           <div className="p-4 md:p-5">
             <div className="flex justify-between items-center">
