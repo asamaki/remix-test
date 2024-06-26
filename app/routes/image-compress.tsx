@@ -7,8 +7,19 @@ export default function Index() {
   const [compressedImgSrc, setCompressedImgSrc] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [compressing, setCompressing] = useState<boolean>(false);
-  const [maxSizeMB, setMaxSizeMB] = useState<number>(1); // 追加
-  const [maxWidthOrHeight, setMaxWidthOrHeight] = useState<number>(800); // 追加
+  const [compressionRate, setCompressionRate] = useState<number>(50); // デフォルトは50%
+  const [imageSize, setImageSize] = useState<number | null>(null); // 元画像のサイズ
+  const [imageWidth, setImageWidth] = useState<number | null>(null); // 元画像の幅
+  const [imageHeight, setImageHeight] = useState<number | null>(null); // 元画像の高さ
+  const [compressedImageSize, setCompressedImageSize] = useState<number | null>(
+    null,
+  ); // 圧縮画像のサイズ
+  const [compressedImageWidth, setCompressedImageWidth] = useState<
+    number | null
+  >(null); // 圧縮画像の幅
+  const [compressedImageHeight, setCompressedImageHeight] = useState<
+    number | null
+  >(null); // 圧縮画像の高さ
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const compressedFileRef = useRef<File | null>(null);
 
@@ -17,6 +28,9 @@ export default function Index() {
     if (!file) {
       setError("ファイルが選択されていません");
       setImgSrc(null);
+      setImageSize(null);
+      setImageWidth(null);
+      setImageHeight(null);
       return;
     }
     setLoading(true);
@@ -25,11 +39,23 @@ export default function Index() {
       setImgSrc(reader.result as string);
       setError(null);
       setLoading(false);
+
+      // 画像のサイズと縦横を取得
+      const img = new Image();
+      img.onload = () => {
+        setImageSize(file.size / (1024 * 1024)); // MBに変換
+        setImageWidth(img.width);
+        setImageHeight(img.height);
+      };
+      img.src = reader.result as string;
     };
     reader.onerror = () => {
       setError("ファイルの読み込みに失敗しました");
       setImgSrc(null);
       setLoading(false);
+      setImageSize(null);
+      setImageWidth(null);
+      setImageHeight(null);
     };
     reader.readAsDataURL(file);
   };
@@ -41,13 +67,14 @@ export default function Index() {
     }
 
     const file = fileInputRef.current.files[0];
+    const targetSizeMB = (file.size / (1024 * 1024)) * (compressionRate / 100);
 
+    setCompressing(true);
     try {
-      setCompressing(true);
       const options = {
-        maxSizeMB: maxSizeMB, // フォームから取得
-        maxWidthOrHeight: maxWidthOrHeight, // フォームから取得
+        maxSizeMB: targetSizeMB,
         useWebWorker: true,
+        alwaysKeepResolution: true,
       };
 
       const compressedFile = await imageCompression(file, options);
@@ -57,16 +84,26 @@ export default function Index() {
       reader.onloadend = () => {
         setCompressedImgSrc(reader.result as string);
         setError(null);
+        setCompressing(false);
+
+        // 圧縮画像のサイズと縦横を取得
+        const img = new Image();
+        img.onload = () => {
+          setCompressedImageSize(compressedFile.size / (1024 * 1024)); // MBに変換
+          setCompressedImageWidth(img.width);
+          setCompressedImageHeight(img.height);
+        };
+        img.src = reader.result as string;
       };
       reader.onerror = () => {
         setError("圧縮ファイルの読み込みに失敗しました");
         setCompressedImgSrc(null);
+        setCompressing(false);
       };
       reader.readAsDataURL(compressedFile);
     } catch (error) {
       setError("画像の圧縮に失敗しました");
       setCompressedImgSrc(null);
-    } finally {
       setCompressing(false);
     }
   };
@@ -82,11 +119,11 @@ export default function Index() {
 
   return (
     <>
-      <div className="max-w-4xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
+      <div className="max-w-4xl px-4 py-10 sm:px-4 lg:px-8 lg:py-8 mx-auto">
         <div className="bg-white rounded-xl shadow p-4 sm:p-7">
           <div className="grid sm:grid-cols-12 gap-2 sm:gap-4 py-8 first:pt-0 last:pb-0 border-t first:border-transparent border-gray-200">
             <div className="sm:col-span-12">
-              <h2 className="text-lg font-semibold text-gray-800">画像変換</h2>
+              <h2 className="text-lg font-semibold text-gray-800">画像圧縮</h2>
             </div>
             <div className="sm:col-span-12">
               <ul className="list-disc space-y-1 ps-5 text-md text-gray-800 mb-4">
@@ -112,41 +149,74 @@ export default function Index() {
                 {error ? <h2>{error}</h2> : null}
                 {loading ? <p>画像を読み込み中...</p> : null}
 
-                {imgSrc ? (
+                {imgSrc &&
+                imageSize !== null &&
+                imageWidth !== null &&
+                imageHeight !== null ? (
                   <>
-                    <h2 className="mt-4">読み込まれた画像</h2>
+                    <h2 className="mt-4">
+                      読み込まれた画像（アップロードされていません）
+                    </h2>
                     <img
                       className="my-4"
                       alt="uploaded"
                       src={imgSrc}
                       style={{ maxWidth: "30%" }}
                     />
+                    <p>{imageSize.toFixed(2)}MB {imageWidth}×{imageHeight}</p>
 
                     <div className="mt-4">
                       <label className="block text-sm font-medium text-gray-700">
-                        最大サイズ（MB）
+                        圧縮率 {compressionRate}%
                       </label>
+                      
                       <input
-                        type="number"
-                        value={maxSizeMB}
-                        onChange={(e) => setMaxSizeMB(Number(e.target.value))}
-                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                      />
-                    </div>
+                        type="range"
+                        className="w-full bg-transparent cursor-pointer appearance-none disabled:opacity-50 disabled:pointer-events-none focus:outline-none
+                        [&::-webkit-slider-thumb]:w-2.5
+                        [&::-webkit-slider-thumb]:h-2.5
+                        [&::-webkit-slider-thumb]:-mt-0.5
+                        [&::-webkit-slider-thumb]:appearance-none
+                        [&::-webkit-slider-thumb]:bg-white
+                        [&::-webkit-slider-thumb]:shadow-[0_0_0_4px_rgba(37,99,235,1)]
+                        [&::-webkit-slider-thumb]:rounded-full
+                        [&::-webkit-slider-thumb]:transition-all
+                        [&::-webkit-slider-thumb]:duration-150
+                        [&::-webkit-slider-thumb]:ease-in-out
+                        [&::-webkit-slider-thumb]:
 
-                    <div className="mt-4">
-                      <label className="block text-sm font-medium text-gray-700">
-                        最大幅または高さ（px）
-                      </label>
-                      <input
-                        type="number"
-                        value={maxWidthOrHeight}
+                        [&::-moz-range-thumb]:w-2.5
+                        [&::-moz-range-thumb]:h-2.5
+                        [&::-moz-range-thumb]:appearance-none
+                        [&::-moz-range-thumb]:bg-white
+                        [&::-moz-range-thumb]:border-4
+                        [&::-moz-range-thumb]:border-blue-600
+                        [&::-moz-range-thumb]:rounded-full
+                        [&::-moz-range-thumb]:transition-all
+                        [&::-moz-range-thumb]:duration-150
+                        [&::-moz-range-thumb]:ease-in-out
+
+                        [&::-webkit-slider-runnable-track]:w-full
+                        [&::-webkit-slider-runnable-track]:h-2
+                        [&::-webkit-slider-runnable-track]:bg-gray-100
+                        [&::-webkit-slider-runnable-track]:rounded-full
+                        [&::-webkit-slider-runnable-track]:
+
+                        [&::-moz-range-track]:w-full
+                        [&::-moz-range-track]:h-2
+                        [&::-moz-range-track]:bg-gray-100
+                        [&::-moz-range-track]:rounded-full"
+                        id="basic-range-slider-usage"
+                        value={compressionRate}
+                        min={0.1}
+                        max={99.9}
+                        step={0.1}
                         onChange={(e) =>
-                          setMaxWidthOrHeight(Number(e.target.value))
+                          setCompressionRate(Number(e.target.value))
                         }
-                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                      />
+                      ></input>
                     </div>
+
                     <button
                       type="button"
                       onClick={handleCompress}
@@ -167,6 +237,7 @@ export default function Index() {
                     src={compressedImgSrc}
                     style={{ maxWidth: "30%" }}
                   />
+                  <p>{compressedImageSize?.toFixed(2)}MB {compressedImageWidth}×{compressedImageHeight}</p>
                   <button
                     type="button"
                     onClick={handleDownload}
