@@ -7,6 +7,13 @@ export default function Index() {
   const [convertedImgSrc, setConvertedImgSrc] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [converting, setConverting] = useState<boolean>(false);
+  const [imageSize, setImageSize] = useState<number | null>(null); // 元画像のサイズ
+  const [imageWidth, setImageWidth] = useState<number | null>(null); // 元画像の幅
+  const [imageHeight, setImageHeight] = useState<number | null>(null); // 元画像の高さ
+  const [convertedImageSize, setConvertedImageSize] = useState<number | null>(null); // 変換後画像のサイズ
+  const [convertedImageWidth, setConvertedImageWidth] = useState<number | null>(null); // 変換後画像の幅
+  const [convertedImageHeight, setConvertedImageHeight] = useState<number | null>(null); // 変換後画像の高さ
+  const [convertedFormat, setConvertedFormat] = useState<string | null>(null); // 変換後の画像形式
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -14,17 +21,31 @@ export default function Index() {
     if (!file) {
       setError("ファイルが選択されていません");
       setImgSrc(null);
+      setImageSize(null);
+      setImageWidth(null);
+      setImageHeight(null);
       return;
     }
 
+    setLoading(true);
     const reader = new FileReader();
     reader.onloadend = () => {
       setImgSrc(reader.result as string);
       setError(null);
+
+      const img = new Image();
+      img.onload = () => {
+        setImageSize(file.size / (1024 * 1024)); // MBに変換
+        setImageWidth(img.width);
+        setImageHeight(img.height);
+        setLoading(false);
+      };
+      img.src = reader.result as string;
     };
     reader.onerror = () => {
       setError("ファイルの読み込みに失敗しました");
       setImgSrc(null);
+      setLoading(false);
     };
     reader.readAsDataURL(file);
   };
@@ -43,16 +64,18 @@ export default function Index() {
       let convertedFile: File;
       let targetFormat: "image/jpeg" | "image/png";
 
-      // ファイルの拡張子に応じて変換
       if (file.type === "image/jpeg" || file.name.toLowerCase().endsWith(".jpg") || file.name.toLowerCase().endsWith(".jpeg")) {
         targetFormat = "image/png";
+        setConvertedFormat("PNG");
       } else if (file.type === "image/png" || file.name.toLowerCase().endsWith(".png")) {
         targetFormat = "image/jpeg";
+        setConvertedFormat("JPG");
       } else {
         throw new Error("サポートされていないファイル形式です");
       }
 
       const options = {
+        maxWidthOrHeight: 1024,
         useWebWorker: true,
         fileType: targetFormat === "image/jpeg" ? "jpg" : "png",
       };
@@ -62,8 +85,16 @@ export default function Index() {
       const reader = new FileReader();
       reader.onloadend = () => {
         setConvertedImgSrc(reader.result as string);
-        setLoading(false);
-        setConverting(false);
+
+        const img = new Image();
+        img.onload = () => {
+          setConvertedImageSize(convertedFile.size / (1024 * 1024)); // MBに変換
+          setConvertedImageWidth(img.width);
+          setConvertedImageHeight(img.height);
+          setLoading(false);
+          setConverting(false);
+        };
+        img.src = reader.result as string;
       };
       reader.readAsDataURL(convertedFile);
     } catch (error) {
@@ -121,6 +152,9 @@ export default function Index() {
                       src={imgSrc}
                       style={{ maxWidth: "30%" }}
                     />
+                    <p>
+                      変換前: {imageSize?.toFixed(2)}MB {imageWidth}×{imageHeight}
+                    </p>
                     <button
                       type="button"
                       onClick={convertImage}
@@ -141,6 +175,10 @@ export default function Index() {
                     src={convertedImgSrc}
                     style={{ maxWidth: "30%" }}
                   />
+                  <p>
+                    変換後: {convertedImageSize?.toFixed(2)}MB {convertedImageWidth}×
+                    {convertedImageHeight} {convertedFormat}
+                  </p>
                   <button
                     type="button"
                     onClick={handleDownload}
