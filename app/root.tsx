@@ -26,7 +26,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <header className="flex flex-wrap sm:justify-start sm:flex-nowrap z-50 w-full bg-primary-950 text-sm py-3 sm:py-0 ">
             <nav className="relative max-w-[85rem] w-full mx-auto px-4 sm:flex sm:items-center sm:justify-between sm:px-6 lg:px-8" aria-label="Global">
               <div className="flex items-center justify-between sm:my-4 sm:ps-4">
-                <a className="flex-none text-xl font-semibold text-white" href="#" aria-label="Brand">ゴーストツール</a>
+                <a className="flex-none text-xl font-semibold text-white" href="/" aria-label="Brand">ゴーストツール</a>
               </div>
             </nav>
           </header>
