@@ -1,12 +1,7 @@
 import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import {
   json,
-  useLoaderData,
-  useNavigate,
-  useSearchParams,
 } from "@remix-run/react";
-import { createCookie } from "@remix-run/node";
-import React, { useState } from "react";
 
 export const meta: MetaFunction = () => {
   return [
@@ -27,18 +22,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export default function Index() {
-  const data = useLoaderData<typeof loader>();
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const [view, setView] = React.useState(searchParams.get("view") || "list");
-  const [isOpen, setIsOpen] = React.useState(false);
-
-  const [money, setMoney] = useState(0);
-  const setM = (money: number) => {
-    console.log(money);
-    setMoney(money + 1);
-  };
-
   return (
     <div className="max-w-[85rem] px-4 py-8 sm:px-6 lg:px-8 lg:py-14 mx-auto">
       <ul className="list-disc space-y-1 ps-5 text-md text-gray-800 mb-4">
