@@ -4,24 +4,17 @@ import imageCompression from "browser-image-compression";
 export default function Index() {
   const [error, setError] = useState<string | null>(null);
   const [imgSrc, setImgSrc] = useState<string | null>(null);
-  const [compressedImgSrc, setCompressedImgSrc] = useState<string | null>(null);
+  const [resizedImgSrc, setResizedImgSrc] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [compressing, setCompressing] = useState<boolean>(false);
-  const [compressionRate, setCompressionRate] = useState<number>(50); // デフォルトは50%
+  const [resizing, setResizing] = useState<boolean>(false);
   const [imageSize, setImageSize] = useState<number | null>(null); // 元画像のサイズ
   const [imageWidth, setImageWidth] = useState<number | null>(null); // 元画像の幅
   const [imageHeight, setImageHeight] = useState<number | null>(null); // 元画像の高さ
-  const [compressedImageSize, setCompressedImageSize] = useState<number | null>(
-    null,
-  ); // 圧縮画像のサイズ
-  const [compressedImageWidth, setCompressedImageWidth] = useState<
-    number | null
-  >(null); // 圧縮画像の幅
-  const [compressedImageHeight, setCompressedImageHeight] = useState<
-    number | null
-  >(null); // 圧縮画像の高さ
+  const [resizedImageSize, setResizedImageSize] = useState<number | null>(null); // リサイズ画像のサイズ
+  const [resizedImageWidth, setResizedImageWidth] = useState<number | null>(null); // リサイズ画像の幅
+  const [resizedImageHeight, setResizedImageHeight] = useState<number | null>(null); // リサイズ画像の高さ
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const compressedFileRef = useRef<File | null>(null);
+  const resizedFileRef = useRef<File | null>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -60,59 +53,59 @@ export default function Index() {
     reader.readAsDataURL(file);
   };
 
-  const handleCompress = async () => {
+  const handleResize = async () => {
     if (!fileInputRef.current?.files?.[0]) {
       setError("ファイルが選択されていません");
       return;
     }
 
     const file = fileInputRef.current.files[0];
-    const targetSizeMB = (file.size / (1024 * 1024)) * (compressionRate / 100);
+    const width = parseInt((document.getElementById("resize-width") as HTMLInputElement).value);
+    const height = parseInt((document.getElementById("resize-height") as HTMLInputElement).value);
 
-    setCompressing(true);
+    setResizing(true);
     try {
       const options = {
-        maxSizeMB: targetSizeMB,
+        maxWidthOrHeight: Math.max(width, height),
         useWebWorker: true,
-        alwaysKeepResolution: true,
       };
 
-      const compressedFile = await imageCompression(file, options);
-      compressedFileRef.current = compressedFile;
+      const resizedFile = await imageCompression(file, options);
+      resizedFileRef.current = resizedFile;
 
       const reader = new FileReader();
       reader.onloadend = () => {
-        setCompressedImgSrc(reader.result as string);
+        setResizedImgSrc(reader.result as string);
         setError(null);
-        setCompressing(false);
+        setResizing(false);
 
-        // 圧縮画像のサイズと縦横を取得
+        // リサイズ画像のサイズと縦横を取得
         const img = new Image();
         img.onload = () => {
-          setCompressedImageSize(compressedFile.size / (1024 * 1024)); // MBに変換
-          setCompressedImageWidth(img.width);
-          setCompressedImageHeight(img.height);
+          setResizedImageSize(resizedFile.size / (1024 * 1024)); // MBに変換
+          setResizedImageWidth(img.width);
+          setResizedImageHeight(img.height);
         };
         img.src = reader.result as string;
       };
       reader.onerror = () => {
-        setError("圧縮ファイルの読み込みに失敗しました");
-        setCompressedImgSrc(null);
-        setCompressing(false);
+        setError("リサイズファイルの読み込みに失敗しました");
+        setResizedImgSrc(null);
+        setResizing(false);
       };
-      reader.readAsDataURL(compressedFile);
+      reader.readAsDataURL(resizedFile);
     } catch (error) {
-      setError("画像の圧縮に失敗しました");
-      setCompressedImgSrc(null);
-      setCompressing(false);
+      setError("画像のリサイズに失敗しました");
+      setResizedImgSrc(null);
+      setResizing(false);
     }
   };
 
   const handleDownload = () => {
-    if (compressedImgSrc && compressedFileRef.current) {
+    if (resizedImgSrc && resizedFileRef.current) {
       const a = document.createElement("a");
-      a.href = compressedImgSrc;
-      a.download = compressedFileRef.current.name;
+      a.href = resizedImgSrc;
+      a.download = resizedFileRef.current.name;
       a.click();
     }
   };
@@ -123,13 +116,16 @@ export default function Index() {
         <div className="bg-white rounded-xl shadow p-4 sm:p-7">
           <div className="grid sm:grid-cols-12 gap-2 sm:gap-4 py-8 first:pt-0 last:pb-0 border-t first:border-transparent border-gray-200">
             <div className="sm:col-span-12">
-              <h2 className="text-lg font-semibold text-gray-800">画像圧縮</h2>
+              <h2 className="text-lg font-semibold text-gray-800">画像サイズ変更</h2>
             </div>
             <div className="sm:col-span-12">
               <ul className="list-disc space-y-1 ps-5 text-md text-gray-800 mb-4">
-                <li className="ps-1">画像を圧縮できます。</li>
+                <li className="ps-1">画像をリサイズできます。</li>
                 <li className="ps-1">
                   アップロードは行われず、すべてブラウザで処理されます。
+                </li>
+                <li className="ps-1">
+                  画像の縦横比は維持されます。
                 </li>
               </ul>
 
@@ -169,79 +165,50 @@ export default function Index() {
 
                     <div className="mt-4">
                       <label className="block text-sm font-medium text-gray-700">
-                        圧縮率 {compressionRate}%
+                        幅 (px)
                       </label>
-
                       <input
-                        type="range"
-                        className="w-full bg-transparent cursor-pointer appearance-none disabled:opacity-50 disabled:pointer-events-none focus:outline-none
-                        [&::-webkit-slider-thumb]:w-2.5
-                        [&::-webkit-slider-thumb]:h-2.5
-                        [&::-webkit-slider-thumb]:-mt-0.5
-                        [&::-webkit-slider-thumb]:appearance-none
-                        [&::-webkit-slider-thumb]:bg-white
-                        [&::-webkit-slider-thumb]:shadow-[0_0_0_4px_rgba(37,99,235,1)]
-                        [&::-webkit-slider-thumb]:rounded-full
-                        [&::-webkit-slider-thumb]:transition-all
-                        [&::-webkit-slider-thumb]:duration-150
-                        [&::-webkit-slider-thumb]:ease-in-out
-                        [&::-webkit-slider-thumb]:
-
-                        [&::-moz-range-thumb]:w-2.5
-                        [&::-moz-range-thumb]:h-2.5
-                        [&::-moz-range-thumb]:appearance-none
-                        [&::-moz-range-thumb]:bg-white
-                        [&::-moz-range-thumb]:border-4
-                        [&::-moz-range-thumb]:border-blue-600
-                        [&::-moz-range-thumb]:rounded-full
-                        [&::-moz-range-thumb]:transition-all
-                        [&::-moz-range-thumb]:duration-150
-                        [&::-moz-range-thumb]:ease-in-out
-
-                        [&::-webkit-slider-runnable-track]:w-full
-                        [&::-webkit-slider-runnable-track]:h-2
-                        [&::-webkit-slider-runnable-track]:bg-gray-100
-                        [&::-webkit-slider-runnable-track]:rounded-full
-                        [&::-webkit-slider-runnable-track]:
-
-                        [&::-moz-range-track]:w-full
-                        [&::-moz-range-track]:h-2
-                        [&::-moz-range-track]:bg-gray-100
-                        [&::-moz-range-track]:rounded-full"
-                        id="basic-range-slider-usage"
-                        value={compressionRate}
-                        min={0.1}
-                        max={99.9}
-                        step={0.1}
-                        onChange={(e) =>
-                          setCompressionRate(Number(e.target.value))
-                        }
-                      ></input>
+                        type="number"
+                        id="resize-width"
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                        defaultValue={imageWidth}
+                      />
+                    </div>
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-700">
+                        高さ (px)
+                      </label>
+                      <input
+                        type="number"
+                        id="resize-height"
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                        defaultValue={imageHeight}
+                      />
                     </div>
 
                     <button
                       type="button"
-                      onClick={handleCompress}
+                      onClick={handleResize}
                       className="w-full my-4 py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
                     >
-                      画像を圧縮（アップロードなし）
+                      画像をリサイズ（アップロードなし）
                     </button>
-                    {compressing ? <p>画像を圧縮中...</p> : null}
+                    {resizing ? <p>画像をリサイズ中...</p> : null}
                   </>
                 ) : null}
               </form>
 
-              {compressedImgSrc ? (
+              {resizedImgSrc ? (
                 <>
-                  <h2>圧縮された画像</h2>
+                  <h2>リサイズされた画像</h2>
                   <img
-                    alt="compressed"
-                    src={compressedImgSrc}
+                    alt="resized"
+                    src={resizedImgSrc}
                     style={{ maxWidth: "30%" }}
                   />
                   <p>
-                    {compressedImageSize?.toFixed(2)}MB {compressedImageWidth}×
-                    {compressedImageHeight}
+                    {resizedImageSize?.toFixed(2)}MB {resizedImageWidth}×
+                    {resizedImageHeight}
                   </p>
                   <button
                     type="button"
@@ -256,9 +223,9 @@ export default function Index() {
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     >
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                       <polyline points="7 10 12 15 17 10" />
