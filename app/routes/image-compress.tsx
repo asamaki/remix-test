@@ -174,10 +174,10 @@ export default function Index() {
 
                       <input
                         type="range"
-                        className="w-full bg-transparent cursor-pointer appearance-none disabled:opacity-50 disabled:pointer-events-none focus:outline-none
-                        [&::-webkit-slider-thumb]:w-2.5
-                        [&::-webkit-slider-thumb]:h-2.5
-                        [&::-webkit-slider-thumb]:-mt-0.5
+                        className="w-full bg-transparent cursor-pointer appearance-none disabled:opacity-50 disabled:pointer-events-none focus:outline-none mb-4
+                        [&::-webkit-slider-thumb]:w-5
+                        [&::-webkit-slider-thumb]:h-5
+                        [&::-webkit-slider-thumb]:-mt-1.5
                         [&::-webkit-slider-thumb]:appearance-none
                         [&::-webkit-slider-thumb]:bg-white
                         [&::-webkit-slider-thumb]:shadow-[0_0_0_4px_rgba(37,99,235,1)]
@@ -185,10 +185,9 @@ export default function Index() {
                         [&::-webkit-slider-thumb]:transition-all
                         [&::-webkit-slider-thumb]:duration-150
                         [&::-webkit-slider-thumb]:ease-in-out
-                        [&::-webkit-slider-thumb]:
 
-                        [&::-moz-range-thumb]:w-2.5
-                        [&::-moz-range-thumb]:h-2.5
+                        [&::-moz-range-thumb]:w-5
+                        [&::-moz-range-thumb]:h-5
                         [&::-moz-range-thumb]:appearance-none
                         [&::-moz-range-thumb]:bg-white
                         [&::-moz-range-thumb]:border-4
