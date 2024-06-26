@@ -3,118 +3,138 @@ import imageCompression from "browser-image-compression";
 
 export default function Index() {
   const [error, setError] = useState<string | null>(null);
-  const [imgSrc, setImgSrc] = useState<string | null>(null);
-  const [compressedImgSrc, setCompressedImgSrc] = useState<string | null>(null);
+  const [images, setImages] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [compressing, setCompressing] = useState<boolean>(false);
   const [compressionRate, setCompressionRate] = useState<number>(50); // デフォルトは50%
-  const [imageSize, setImageSize] = useState<number | null>(null); // 元画像のサイズ
-  const [imageWidth, setImageWidth] = useState<number | null>(null); // 元画像の幅
-  const [imageHeight, setImageHeight] = useState<number | null>(null); // 元画像の高さ
-  const [compressedImageSize, setCompressedImageSize] = useState<number | null>(
-    null,
-  ); // 圧縮画像のサイズ
-  const [compressedImageWidth, setCompressedImageWidth] = useState<
-    number | null
-  >(null); // 圧縮画像の幅
-  const [compressedImageHeight, setCompressedImageHeight] = useState<
-    number | null
-  >(null); // 圧縮画像の高さ
+  const [progress, setProgress] = useState<number>(0); // 進捗率を管理
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const compressedFileRef = useRef<File | null>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) {
+    const files = event.target.files;
+    if (!files || files.length === 0) {
       setError("ファイルが選択されていません");
-      setImgSrc(null);
-      setImageSize(null);
-      setImageWidth(null);
-      setImageHeight(null);
+      setImages([]);
+      return;
+    }
+    if (files.length > 3) {
+      setError("一度に選択できる画像の最大枚数は3枚です");
+      setImages([]);
       return;
     }
     setLoading(true);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImgSrc(reader.result as string);
-      setError(null);
-      setLoading(false);
+    const newImages = Array.from(files).map((file) => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const imgSrc = reader.result as string;
+          const img = new Image();
+          img.onload = () => {
+            resolve({
+              file,
+              imgSrc,
+              imageSize: file.size / (1024 * 1024),
+              imageWidth: img.width,
+              imageHeight: img.height,
+              compressedImgSrc: null,
+              compressedImageSize: null,
+              compressedImageWidth: null,
+              compressedImageHeight: null,
+            });
+          };
+          img.src = imgSrc;
+        };
+        reader.onerror = () => {
+          reject("ファイルの読み込みに失敗しました");
+        };
+        reader.readAsDataURL(file);
+      });
+    });
 
-      // 画像のサイズと縦横を取得
-      const img = new Image();
-      img.onload = () => {
-        setImageSize(file.size / (1024 * 1024)); // MBに変換
-        setImageWidth(img.width);
-        setImageHeight(img.height);
-      };
-      img.src = reader.result as string;
-    };
-    reader.onerror = () => {
-      setError("ファイルの読み込みに失敗しました");
-      setImgSrc(null);
-      setLoading(false);
-      setImageSize(null);
-      setImageWidth(null);
-      setImageHeight(null);
-    };
-    reader.readAsDataURL(file);
+    Promise.all(newImages)
+      .then((results) => {
+        setImages(results);
+        setError(null);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err as string);
+        setLoading(false);
+      });
   };
 
   const handleCompress = async () => {
-    if (!fileInputRef.current?.files?.[0]) {
+    if (!fileInputRef.current?.files || fileInputRef.current.files.length === 0) {
       setError("ファイルが選択されていません");
       return;
     }
 
-    const file = fileInputRef.current.files[0];
-    const targetSizeMB = (file.size / (1024 * 1024)) * (compressionRate / 100);
-
     setCompressing(true);
+    setProgress(0);
+
     try {
-      const options = {
-        maxSizeMB: targetSizeMB,
-        useWebWorker: true,
-        alwaysKeepResolution: true,
-      };
+      const compressedImages = await Promise.all(
+        images.map(async (image, index) => {
+          const file = image.file;
+          const targetSizeMB = (file.size / (1024 * 1024)) * (compressionRate / 100);
 
-      const compressedFile = await imageCompression(file, options);
-      compressedFileRef.current = compressedFile;
+          const options = {
+            maxSizeMB: targetSizeMB,
+            useWebWorker: true,
+            alwaysKeepResolution: true,
+          };
 
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setCompressedImgSrc(reader.result as string);
-        setError(null);
-        setCompressing(false);
+          const compressedFile = await imageCompression(file, options);
 
-        // 圧縮画像のサイズと縦横を取得
-        const img = new Image();
-        img.onload = () => {
-          setCompressedImageSize(compressedFile.size / (1024 * 1024)); // MBに変換
-          setCompressedImageWidth(img.width);
-          setCompressedImageHeight(img.height);
-        };
-        img.src = reader.result as string;
-      };
-      reader.onerror = () => {
-        setError("圧縮ファイルの読み込みに失敗しました");
-        setCompressedImgSrc(null);
-        setCompressing(false);
-      };
-      reader.readAsDataURL(compressedFile);
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const compressedImgSrc = reader.result as string;
+              const img = new Image();
+              img.onload = () => {
+                resolve({
+                  ...image,
+                  compressedImgSrc,
+                  compressedImageSize: compressedFile.size / (1024 * 1024),
+                  compressedImageWidth: img.width,
+                  compressedImageHeight: img.height,
+                  compressedFile,
+                });
+                setProgress(((index + 1) / images.length) * 100);
+              };
+              img.src = compressedImgSrc;
+            };
+            reader.onerror = () => {
+              reject("圧縮ファイルの読み込みに失敗しました");
+            };
+            reader.readAsDataURL(compressedFile);
+          });
+        })
+      );
+
+      setImages(compressedImages);
+      setError(null);
+      setCompressing(false);
+      setProgress(100);
     } catch (error) {
       setError("画像の圧縮に失敗しました");
-      setCompressedImgSrc(null);
       setCompressing(false);
     }
   };
 
-  const handleDownload = () => {
-    if (compressedImgSrc && compressedFileRef.current) {
-      const a = document.createElement("a");
-      a.href = compressedImgSrc;
-      a.download = compressedFileRef.current.name;
-      a.click();
-    }
+  const handleDownloadAll = () => {
+    images.forEach((image) => {
+      if (image.compressedImgSrc) {
+        handleDownload(image.compressedImgSrc, image.compressedFile.name);
+      }
+    });
+  };
+
+  const handleDownload = (compressedImgSrc: string, name: string) => {
+    const a = document.createElement("a");
+    a.href = compressedImgSrc;
+    a.download = name;
+    a.click();
   };
 
   return (
@@ -131,6 +151,7 @@ export default function Index() {
                 <li className="ps-1">
                   アップロードは行われず、すべてブラウザで処理されます。
                 </li>
+                <li className="ps-1">一度に選択できる画像の最大枚数は3枚です</li>
               </ul>
 
               <form>
@@ -138,6 +159,7 @@ export default function Index() {
                   type="file"
                   name="img"
                   accept="image/*"
+                  multiple
                   onChange={handleFileChange}
                   ref={fileInputRef}
                   className="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none
@@ -149,24 +171,25 @@ export default function Index() {
                 {error ? <h2>{error}</h2> : null}
                 {loading ? <p>画像を読み込み中...</p> : null}
 
-                {imgSrc &&
-                imageSize !== null &&
-                imageWidth !== null &&
-                imageHeight !== null ? (
+                {images.length > 0 && (
                   <>
-                    <h2 className="mt-4">
-                      読み込まれた画像（アップロードされていません）
-                    </h2>
-                    <img
-                      className="my-4"
-                      alt="uploaded"
-                      src={imgSrc}
-                      style={{ maxWidth: "30%" }}
-                    />
-                    <p>
-                      {imageSize.toFixed(2)}MB {imageWidth}×{imageHeight}
-                    </p>
-
+                    <h2 className="mt-4">読み込まれた画像（アップロードされていません）</h2>
+                    <div className="flex flex-wrap">
+                      {images.map((image, index) => (
+                        <div key={index} className="m-2 p-2 border rounded-lg">
+                          <img
+                            className="my-4"
+                            alt="uploaded"
+                            src={image.imgSrc}
+                            style={{ maxWidth: "100px" }}
+                          />
+                          <p>
+                            {image.imageSize.toFixed(2)}MB {image.imageWidth}×{image.imageHeight} {image.imgSrc.includes('jpeg') || image.imgSrc.includes('jpg') ? 'JPG' : 'PNG'}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                    
                     <div className="mt-4">
                       <label className="block text-sm font-medium text-gray-700">
                         圧縮率 {compressionRate}%
@@ -225,48 +248,41 @@ export default function Index() {
                     >
                       画像を圧縮（アップロードなし）
                     </button>
-                    {compressing ? <p>画像を圧縮中...</p> : null}
+                    {compressing ? <p>画像を圧縮中... ({progress.toFixed(0)}%)</p> : null}
                   </>
-                ) : null}
+                )}
               </form>
 
-              {compressedImgSrc ? (
+              {images.some((image) => image.compressedImgSrc) && (
                 <>
                   <h2>圧縮された画像</h2>
-                  <img
-                    alt="compressed"
-                    src={compressedImgSrc}
-                    style={{ maxWidth: "30%" }}
-                  />
-                  <p>
-                    {compressedImageSize?.toFixed(2)}MB {compressedImageWidth}×
-                    {compressedImageHeight}
-                  </p>
+                  <div className="flex flex-wrap">
+                    {images.map(
+                      (image, index) =>
+                        image.compressedImgSrc && (
+                          <div key={index} className="m-2 p-2 border rounded-lg">
+                            <img
+                              alt="compressed"
+                              src={image.compressedImgSrc}
+                              style={{ maxWidth: "100px" }}
+                            />
+                            <p>
+                              {image.compressedImageSize?.toFixed(2)}MB {image.compressedImageWidth}×
+                              {image.compressedImageHeight} {image.compressedImgSrc.includes('jpeg') || image.compressedImgSrc.includes('jpg') ? 'JPG' : 'PNG'}
+                            </p>
+                          </div>
+                        )
+                    )}
+                  </div>
                   <button
                     type="button"
-                    onClick={handleDownload}
-                    className="flex items-center gap-x-2 text-gray-500 hover:text-blue-600 whitespace-nowrap dark:text-neutral-500 dark:hover:text-blue-500"
+                    onClick={handleDownloadAll}
+                    className="w-full my-4 py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
                   >
-                    <svg
-                      className="flex-shrink-0 size-4"
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                      <polyline points="7 10 12 15 17 10" />
-                      <line x1="12" x2="12" y1="15" y2="3" />
-                    </svg>
-                    ダウンロード
+                    すべてダウンロード
                   </button>
                 </>
-              ) : null}
+              )}
             </div>
           </div>
         </div>
