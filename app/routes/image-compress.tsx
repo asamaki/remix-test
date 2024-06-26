@@ -163,13 +163,15 @@ export default function Index() {
                       src={imgSrc}
                       style={{ maxWidth: "30%" }}
                     />
-                    <p>{imageSize.toFixed(2)}MB {imageWidth}×{imageHeight}</p>
+                    <p>
+                      {imageSize.toFixed(2)}MB {imageWidth}×{imageHeight}
+                    </p>
 
                     <div className="mt-4">
                       <label className="block text-sm font-medium text-gray-700">
                         圧縮率 {compressionRate}%
                       </label>
-                      
+
                       <input
                         type="range"
                         className="w-full bg-transparent cursor-pointer appearance-none disabled:opacity-50 disabled:pointer-events-none focus:outline-none
@@ -237,7 +239,10 @@ export default function Index() {
                     src={compressedImgSrc}
                     style={{ maxWidth: "30%" }}
                   />
-                  <p>{compressedImageSize?.toFixed(2)}MB {compressedImageWidth}×{compressedImageHeight}</p>
+                  <p>
+                    {compressedImageSize?.toFixed(2)}MB {compressedImageWidth}×
+                    {compressedImageHeight}
+                  </p>
                   <button
                     type="button"
                     onClick={handleDownload}
