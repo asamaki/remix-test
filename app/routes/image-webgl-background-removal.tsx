@@ -1,8 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { AutoModel, AutoProcessor, env, RawImage } from '@xenova/transformers';
+// @ts-expect-error alpha version types broken
+import { AutoModel, AutoProcessor, RawImage, env } from "@xenova/transformers"
 
-env.allowLocalModels = false;
-env.backends.onnx.wasm.proxy = true;
+env.allowLocalModels = false
+
+// Proxy the WASM backend to prevent the UI from freezing
+env.backends.onnx.wasm.proxy = true // already in a worker
 
 const EXAMPLE_URL = 'https://images.pexels.com/photos/5965592/pexels-photo-5965592.jpeg?auto=compress&cs=tinysrgb&w=1024';
 
@@ -13,13 +16,18 @@ export default function Index() {
   const imageContainerRef = useRef(null);
   const modelRef = useRef(null);
   const processorRef = useRef(null);
+  const [isSupported, setIsSupported] = useState<boolean | null>(null);
+  const [processedImageSrc, setProcessedImageSrc] = useState<string | null>(null);
 
   useEffect(() => {
     const loadModelAndProcessor = async () => {
       setProgress(10);
-      const model = await AutoModel.from_pretrained('briaai/RMBG-1.4', {
-        config: { model_type: 'custom' },
-        progress_callback: (p) => setProgress(10 + p * 40),
+      const model = await AutoModel.from_pretrained('briaai/RMBG-1.4',  {
+        device: "webgpu",
+        dtype: "fp32", // TODO: add fp16 support
+        config: {
+          model_type: "custom",
+        },
       });
       setProgress(50);
       const processor = await AutoProcessor.from_pretrained('briaai/RMBG-1.4', {
@@ -35,7 +43,6 @@ export default function Index() {
           rescale_factor: 0.00392156862745098,
           size: { width: 1024, height: 1024 },
         },
-        progress_callback: (p) => setProgress(50 + p * 40),
       });
       modelRef.current = model;
       processorRef.current = processor;
@@ -44,7 +51,39 @@ export default function Index() {
     };
 
     loadModelAndProcessor();
+
+    const checkWebGPUSupport = async () => {
+      if ('gpu' in navigator) {
+        try {
+          const adapter = await (navigator as any).gpu.requestAdapter();
+          if (adapter) {
+            setIsSupported(true);
+          } else {
+            setIsSupported(false);
+          }
+        } catch (e) {
+          setIsSupported(false);
+        }
+      } else {
+        setIsSupported(false);
+      }
+    };
+
+    checkWebGPUSupport();
   }, []);
+
+  const getScale = (width, height, maxSize = 1280) => {
+    const size = Math.max(width, height);
+  
+    // 最大サイズ以下は1
+    if (size <= maxSize) {
+      return 1;
+    }
+  
+    // 小数第4位で四捨五入する
+    const scale = maxSize / size;
+    return Math.round(scale * 10000) / 10000;
+  };
 
   const predict = async (url) => {
     setProgress(0);
@@ -52,13 +91,6 @@ export default function Index() {
     const container = imageContainerRef.current;
 
     container.innerHTML = '';
-    container.style.backgroundImage = `url(${url})`;
-
-    const ar = image.width / image.height;
-    const [cw, ch] = (ar > 720 / 480) ? [720, 720 / ar] : [480 * ar, 480];
-    container.style.width = `${cw}px`;
-    container.style.height = `${ch}px`;
-
     setStatus('解析中...');
     setProgress(20);
 
@@ -69,11 +101,14 @@ export default function Index() {
     const mask = await RawImage.fromTensor(output[0].mul(255).to('uint8')).resize(image.width, image.height);
     setProgress(80);
 
+    const scale = getScale(image.width, image.height);
+
     const canvas = document.createElement('canvas');
-    canvas.width = image.width;
-    canvas.height = image.height;
+    canvas.width = image.width * scale;
+    canvas.height = image.height * scale;
     const ctx = canvas.getContext('2d');
-    ctx.drawImage(image.toCanvas(), 0, 0);
+
+    ctx.drawImage(image.toCanvas(), 0, 0, image.width * scale, image.height * scale);
 
     const pixelData = ctx.getImageData(0, 0, image.width, image.height);
     for (let i = 0; i < mask.data.length; ++i) {
@@ -81,8 +116,10 @@ export default function Index() {
     }
     ctx.putImageData(pixelData, 0, 0);
 
+    const processedImgSrc = canvas.toDataURL(); // Convert canvas to base64 encoded URL
+    setProcessedImageSrc(processedImgSrc);
+
     container.append(canvas);
-    container.style.removeProperty('background-image');
     setStatus('完了!');
     setProgress(100);
   };
@@ -96,63 +133,77 @@ export default function Index() {
     reader.readAsDataURL(file);
   };
 
-  const handleExampleClick = (e) => {
-    e.preventDefault();
-    predict(EXAMPLE_URL);
+  const handleDownload = () => {
+    if (processedImageSrc) {
+      const a = document.createElement('a');
+      a.href = processedImageSrc;
+      a.download = 'processed_image.png';
+      a.click();
+    }
   };
 
   return (
     <div>
-      <h1>
-        背景削除 with{' '}
-        <a href="http://github.com/xenova/transformers.js" target="_blank" rel="noopener noreferrer">
-          🤗 Transformers.js
-        </a>
-      </h1>
-      <h4>
-        ブラウザ内でローカル実行,{' '}
-        <a href="https://huggingface.co/briaai/RMBG-1.4" target="_blank" rel="noopener noreferrer">
-          RMBG V1.4モデル
-        </a>{' '}
-        提供{' '}
-        <a href="https://bria.ai/" target="_blank" rel="noopener noreferrer">
-          BRIA AI
-        </a>
-      </h4>
-      <div id="container" ref={imageContainerRef}>
-        <label id="upload-button" htmlFor="upload">
-          <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              fill="#000"
-              d="M3.5 24.3a3 3 0 0 1-1.9-.8c-.5-.5-.8-1.2-.8-1.9V2.9c0-.7.3-1.3.8-1.9.6-.5 1.2-.7 2-.7h18.6c.7 0 1.3.2 1.9.7.5.6.7 1.2.7 2v18.6c0 .7-.2 1.4-.7 1.9a3 3 0 0 1-2 .8H3.6Zm0-2.7h18.7V2.9H3.5v18.7Zm2.7-2.7h13.3c.3 0 .5 0 .6-.3v-.7l-3.7-5a.6.6 0 0 0-.6-.2c-.2 0-.4 0-.5.3l-3.5 4.6-2.4-3.3a.6.6 0 0 0-.6-.3c-.2 0-.4.1-.5.3l-2.7 3.6c-.1.2-.2.4 0 .7.1.2.3.3.6.3Z"
-            ></path>
-          </svg>
-          画像をアップロード
-          <label id="example" onClick={handleExampleClick}>
-            (または例を試す)
-          </label>
-        </label>
+      <div style={{ maxWidth: '100%', maxHeight: '100vh', overflow: 'hidden' }}>
+        <div style={{ padding: '20px' }}>
+          <h2 style={{ fontSize: '1.5em', fontWeight: 'bold', color: '#333' }}>背景削除</h2>
+          <h4 style={{ fontSize: '1.2em', color: '#666' }}>ブラウザ内でローカル実行</h4>
+          {isSupported === null ? (
+            <div>WebGPUサポートをチェック中...</div>
+          ) : (
+            <div>WebGPUは{isSupported ? 'サポートされています' : 'サポートされていません'}</div>
+          )}
+        </div>
+        <div style={{ padding: '20px' }}>
+          <div
+            id="container"
+            ref={imageContainerRef}
+            style={{ maxWidth: '100%', maxHeight: '80vh', overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}
+          ></div>
+          <div style={{ marginTop: '20px' }}>
+            <label
+              id="upload-button"
+              htmlFor="upload"
+              style={{ padding: '10px 20px', border: '1px solid #ccc', borderRadius: '5px', cursor: 'pointer', display: 'inline-block' }}
+            >
+              画像をアップロード
+            </label>
+            <input
+              id="upload"
+              type="file"
+              accept="image/*"
+              ref={fileUploadRef}
+              style={{ display: 'none' }}
+              onChange={handleFileUpload}
+            />
+          </div>
+          <div style={{ marginTop: '20px' }}>
+            <label id="status" style={{ color: '#333' }}>{status}</label>
+            <div style={{ width: '100%', backgroundColor: '#e0e0e0', borderRadius: '5px', marginTop: '10px', height: '20px' }}>
+              <div
+                style={{
+                  width: `${progress}%`,
+                  backgroundColor: '#4CAF50',
+                  height: '100%',
+                  borderRadius: '5px',
+                  transition: 'width 0.5s ease-in-out',
+                }}
+              ></div>
+            </div>
+          </div>
+          {processedImageSrc && (
+            <div style={{ marginTop: '20px' }}>
+              <button
+                type="button"
+                onClick={handleDownload}
+                style={{ padding: '10px 20px', border: '1px solid #ccc', borderRadius: '5px', cursor: 'pointer', display: 'inline-block', backgroundColor: '#4CAF50', color: '#fff', fontWeight: 'bold' }}
+              >
+                画像をダウンロード
+              </button>
+            </div>
+          )}
+        </div>
       </div>
-      <label id="status">{status}</label>
-      <div style={{ width: '100%', backgroundColor: '#e0e0e0', borderRadius: '5px', marginTop: '10px' }}>
-        <div
-          style={{
-            width: `${progress}%`,
-            backgroundColor: '#4CAF50',
-            height: '20px',
-            borderRadius: '5px',
-            transition: 'width 0.5s ease-in-out',
-          }}
-        ></div>
-      </div>
-      <input
-        id="upload"
-        type="file"
-        accept="image/*"
-        ref={fileUploadRef}
-        style={{ display: 'none' }}
-        onChange={handleFileUpload}
-      />
     </div>
   );
 }
