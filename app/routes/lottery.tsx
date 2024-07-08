@@ -93,15 +93,15 @@ export default function Index() {
                       value={minRange}
                       onChange={(e) => setMinRange(e.target.value)}
                       placeholder="最小値"
-                      className="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none pr-4"
+                      className="py-3 px-4 block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none pr-4"
                     />
-                    〜
+                    <span className="py-3 px-2" >〜</span>
                     <input
                       type="number"
                       value={maxRange}
                       onChange={(e) => setMaxRange(e.target.value)}
                       placeholder="最大値"
-                      className="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none pl-4"
+                      className="py-3 px-4 block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none pl-4"
                     />
                   </div>
                 </>
@@ -113,7 +113,7 @@ export default function Index() {
                   <textarea
                     value={names}
                     onChange={(e) => setNames(e.target.value)}
-                    className="block w-full mt-1 border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+                    className="py-3 px-4 block w-full mt-1 border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
                     rows="5"
                   />
                 </>
@@ -126,7 +126,7 @@ export default function Index() {
                 type="number"
                 value={delay}
                 onChange={(e) => setDelay(e.target.value)}
-                className="block w-full mt-1 border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+                className="py-3 px-4 block w-full mt-1 border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
                 min="1"
               />
 
@@ -138,14 +138,16 @@ export default function Index() {
               </button>
             </Form>
             {isAnimating && (
-                <div className="mt-4 p-4 bg-green-100 border border-green-200 rounded-lg">
-                    <h3 className="text-lg text-green-500">抽選中: {animationValue}</h3>
+                <div className="mt-4 p-4 border border-gray-500 rounded-lg">
+                    <p className="text-sm text-gray-500">抽選中</p>
+                    <p className="text-4xl text-gray-500 mr-4">{animationValue}</p>
                 </div>
 
             )}
             {result && (
-              <div className="mt-4 p-4 bg-green-100 border border-green-200 rounded-lg">
-                <h3 className="text-lg font-semibold text-green-800">結果: {result}</h3>
+              <div className="mt-4 p-4 border border-green-500 rounded-lg">
+                    <p className="text-sm text-green-8700">結果</p>
+                    <p className="text-4xl text-green-700 mr-4">{result}</p>
               </div>
             )}
           </div>

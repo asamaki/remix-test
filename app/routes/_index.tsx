@@ -170,7 +170,7 @@ export default function Index() {
         </a>
         <a
           className="group flex flex-col bg-white border shadow-sm rounded-xl hover:shadow-md transition"
-          href="/image-background-removal"
+          href="/lottery"
         >
           <div className="p-4 md:p-5">
             <div className="flex justify-between items-center">
