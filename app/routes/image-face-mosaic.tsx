@@ -5,8 +5,8 @@ import { MetaFunction } from '@remix-run/node';
 export const meta: MetaFunction = () => {
   return [
     { title: "写真の顔をモザイク、ぼかし、目隠しで加工|ゴーストツールズ" },
-    { name: "description", content: "画像内の顔を自動検出し、モザイクやぼかしを適用するプライバシー保護ツールです。アップロードなしの簡単な操作で画像を加工できます。" },
-    { name: "keywords", content: "写真、加工、顔認識,モザイク,ぼかし,プライバシー保護,画像編集,アップロードなし" },
+    { name: "description", content: "画像内の顔を自動検出し、モザイク、ぼかし、目隠し（黒目線）を適用するプライバシー保護ツールです。アップロードなしの簡単な操作で画像を加工できます。" },
+    { name: "keywords", content: "写真,加工,顔認識,モザイク,ぼかし,目隠し,黒目線,プライバシー保護,画像編集,アップロードなし" },
     { property: "og:title", content: "顔モザイク・ぼかしアプリ | ゴーストツールズ" },
     { property: "og:description", content: "画像内の顔を自動検出し、モザイク、ぼかし、目隠しを適用する画像編集ツールです。簡単な操作で画像を加工できます。" },
     { property: "og:type", content: "website" },
