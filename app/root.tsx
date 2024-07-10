@@ -70,7 +70,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <div className="flex items-center justify-between sm:my-4 sm:ps-4">
                 
                 
-                <a className="flex-none text-xl font-semibold text-white" href="/" aria-label="Brand"><img className="inline-block size-[34px] mr-2" src={HeaderIcon} alt="Image Description"/>ゴーストツール</a>
+                <a className="flex-none text-xl font-semibold text-white" href="/" aria-label="Brand"><img className="inline-block size-[34px] mr-2" src={HeaderIcon} alt="Image Description"/>ゴーストツールズ</a>
               </div>
             </nav>
           </header>

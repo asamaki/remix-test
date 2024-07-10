@@ -1,5 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Form } from '@remix-run/react';
+import { MetaFunction } from '@remix-run/node';
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "くじ引き・抽選|ゴーストツールズ" },
+    { name: "description", content: "シンプルで公平なオンラインくじ引き・抽選ツール。名前や数字のリストからランダムに選択。" },
+    { name: "keywords", content: "くじ引き,抽選,ランダム選択,オンラインツール,名前抽選,数字抽選,公平な抽選,無料ツール" },
+    { property: "og:title", content: "くじ引き・抽選|ゴーストツールズ" },
+    { property: "og:description", content: "シンプルで公平なオンラインくじ引き・抽選ツール。名前や数字のリストからランダムに選択。" },
+    { property: "og:type", content: "website" },
+    { property: "og:url", content: "https://ghost-tools.site/face-mosaic" },
+  ];
+};
 
 export default function Index() {
   const [minRange, setMinRange] = useState(0);
