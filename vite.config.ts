@@ -13,4 +13,8 @@ export default defineConfig({
     }),
     tsconfigPaths(),
   ],
+  publicDir: "public",
+  build: {
+    outDir: "build",
+  },
 });

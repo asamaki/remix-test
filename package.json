@@ -27,6 +27,7 @@
     "browser-image-compression": "^2.0.2",
     "cross-env": "^7.0.3",
     "express": "^4.19.2",
+    "face-api.js": "^0.22.2",
     "isbot": "^4.1.0",
     "preline": "^2.3.0",
     "react": "^18.2.0",

@@ -201,6 +201,39 @@ export default function Index() {
             </div>
           </div>
         </a>
+        <a
+          className="group flex flex-col bg-white border shadow-sm rounded-xl hover:shadow-md transition"
+          href="/image-face-mosaic"
+        >
+          <div className="p-4 md:p-5">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="group-hover:text-blue-600 font-semibold text-gray-800">
+                顔モザイク・ぼかしツール
+                </h3>
+                <p className="text-sm text-gray-500">
+                画像内の顔を自動検出し、モザイクやぼかしで画像を加工できます
+                </p>
+              </div>
+              <div className="ps-3">
+                <svg
+                  className="flex-shrink-0 size-5 text-gray-800"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m9 18 6-6-6-6" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </a>
 
 
 
