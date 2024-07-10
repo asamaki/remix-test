@@ -52,23 +52,48 @@ export default function FaceMosaic() {
   const drawEyeCover = (ctx, landmarks, thickness, lengthPercent) => {
     const leftEye = landmarks.getLeftEye();
     const rightEye = landmarks.getRightEye();
-
-    // 両目の外側の点を取得
-    const leftmostX = Math.min(leftEye[0].x, leftEye[3].x);
-    const rightmostX = Math.max(rightEye[0].x, rightEye[3].x);
-
-    // 目の垂直位置の平均を計算
-    const avgY = (leftEye.reduce((sum, point) => sum + point.y, 0) + 
-                  rightEye.reduce((sum, point) => sum + point.y, 0)) / (leftEye.length + rightEye.length);
-
-    // 長さを計算
-    const fullWidth = rightmostX - leftmostX;
-    const adjustedWidth = fullWidth * (lengthPercent / 100);
-    const startX = leftmostX + (fullWidth - adjustedWidth) / 2;
-
+  
+    // 両目の中心点を計算
+    const leftEyeCenter = getCenterPoint(leftEye);
+    const rightEyeCenter = getCenterPoint(rightEye);
+  
+    // 目の角度を計算
+    const angle = Math.atan2(rightEyeCenter.y - leftEyeCenter.y, rightEyeCenter.x - leftEyeCenter.x);
+  
+    // 両目の距離を計算
+    const distance = Math.sqrt(
+      Math.pow(rightEyeCenter.x - leftEyeCenter.x, 2) + 
+      Math.pow(rightEyeCenter.y - leftEyeCenter.y, 2)
+    );
+  
+    // 目隠しの長さを計算
+    const adjustedWidth = distance * (lengthPercent / 100);
+  
+    // 目隠しの中心点を計算
+    const centerX = (leftEyeCenter.x + rightEyeCenter.x) / 2;
+    const centerY = (leftEyeCenter.y + rightEyeCenter.y) / 2;
+  
+    // コンテキストを保存し、回転を適用
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.rotate(angle);
+  
     // 長方形を描画
     ctx.fillStyle = 'black';
-    ctx.fillRect(startX, avgY - thickness / 2, adjustedWidth, thickness);
+    ctx.fillRect(-adjustedWidth / 2, -thickness / 2, adjustedWidth, thickness);
+  
+    // コンテキストを元に戻す
+    ctx.restore();
+  };
+  
+  // 補助関数: 点の配列の中心点を計算
+  const getCenterPoint = (points) => {
+    const sumX = points.reduce((sum, point) => sum + point.x, 0);
+    const sumY = points.reduce((sum, point) => sum + point.y, 0);
+    return {
+      x: sumX / points.length,
+      y: sumY / points.length
+    };
   };
 
   const applyEffect = useCallback(() => {
@@ -86,7 +111,7 @@ export default function FaceMosaic() {
 
       ctx.drawImage(img, 0, 0);
 
-      const minConfidence = 1.1 - (detectionSensitivity * 0.1);
+      const minConfidence = 1.01 - (detectionSensitivity * 0.01);
 
       const detections = await faceapi.detectAllFaces(canvas, new faceapi.TinyFaceDetectorOptions({ scoreThreshold: minConfidence }))
         .withFaceLandmarks(true);
@@ -140,7 +165,7 @@ export default function FaceMosaic() {
 
   return (
     <main className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-4">顔モザイク・ぼかし・目隠し</h1>
+      <h1 className="text-2xl font-bold mb-4">顔モザイク・ぼかし・目隠しツール</h1>
       
       <ul className="mb-6 list-disc list-inside text-gray-600">
         <li>画像内の顔を自動検出し、モザイク、ぼかし、または目隠しで画像を加工できます。</li>
@@ -234,7 +259,7 @@ export default function FaceMosaic() {
               id="detectionSensitivity"
               type="range"
               min="1"
-              max="9"
+              max="99"
               step="1"
               value={detectionSensitivity}
               onChange={(e) => setDetectionSensitivity(Number(e.target.value))}
@@ -263,25 +288,20 @@ export default function FaceMosaic() {
       )}
 
       <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
+        <div>
+          <h2 className="text-xl font-semibold mb-2">元の画像</h2>
           {originalImage && (
-            <div>
-                    <h2 className="text-xl font-semibold mb-2">元の画像</h2>
             <div className="border border-gray-300 rounded-lg overflow-hidden">
               <img src={originalImage} alt="加工前の元画像" className="w-full h-auto object-contain" />
             </div>
-            </div>
           )}
-        
+        </div>
         <div>
-          
+          <h2 className="text-xl font-semibold mb-2">処理後の画像</h2>
           {processedImage && (
-            <>
-              <h2 className="text-xl font-semibold mb-2">処理後の画像</h2>
-              <div className="border border-gray-300 rounded-lg overflow-hidden">
-                <img src={processedImage} alt="顔にモザイク、ぼかし、または目隠しを適用した加工後の画像" className="w-full h-auto object-contain" />
-              </div>
-            </>
+            <div className="border border-gray-300 rounded-lg overflow-hidden">
+              <img src={processedImage} alt="顔にモザイク、ぼかし、または目隠しを適用した加工後の画像" className="w-full h-auto object-contain" />
+            </div>
           )}
           <canvas ref={canvasRef} className={processedImage ? 'hidden' : 'w-full h-auto'} />
         </div>
