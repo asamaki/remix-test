@@ -1,5 +1,18 @@
 import React, { useState, useRef } from "react";
 import { removeBackground } from "@imgly/background-removal"; // 名前付きエクスポートを使用
+import { MetaFunction } from "@remix-run/node";
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "画像背景透過 自動でお手軽に背景透過|ゴーストツールズ" },
+    { name: "description", content: "画像内の背景を自動検出し、透過させるツールです。アップロードなしの簡単な操作で画像を加工できます。" },
+    { name: "keywords", content: "画像,写真,加工,背景透過,プライバシー保護,画像編集,アップロードなし" },
+    { property: "og:title", content: "画像背景透過 自動でお手軽に背景透過|ゴーストツールズ" },
+    { property: "og:description", content: "画像内の背景を自動検出し、透過させるツールです。アップロードなしの簡単な操作で画像を加工できます。" },
+    { property: "og:type", content: "website" },
+    { property: "og:url", content: "https://ghost-tools.site/image-background-removal" },
+  ];
+};
 
 export default function Index() {
   const [error, setError] = useState<string | null>(null);
@@ -120,7 +133,7 @@ export default function Index() {
         <div className="bg-white rounded-xl shadow p-4 sm:p-7">
           <div className="grid sm:grid-cols-12 gap-2 sm:gap-4 py-8 first:pt-0 last:pb-0 border-t first:border-transparent border-gray-200">
             <div className="sm:col-span-12">
-              <h2 className="text-lg font-semibold text-gray-800">画像背景透過</h2>
+              <h1 className="text-lg font-semibold text-gray-800">画像背景透過</h1>
             </div>
             <div className="sm:col-span-12">
               <ul className="list-disc space-y-1 ps-5 text-md text-gray-800 mb-4">

@@ -1,5 +1,18 @@
 import React, { useState, useRef } from "react";
 import imageCompression from "browser-image-compression";
+import { MetaFunction } from "@remix-run/node";
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "画像圧縮 簡単・高品質な画像圧縮ツール|ゴーストツールズ" },
+    { name: "description", content: "ゴーストツールズは、高品質かつ安全な画像圧縮ツールを提供します。オフラインで動作し、アップロード不要で簡単に画像サイズを軽量化できます。" },
+    { name: "keywords", content: "画像圧縮,画像最適化,ファイルサイズ削減,オフライン,プライバシー保護,ゴーストツールズ" },
+    { property: "og:title", content: "画像圧縮 簡単・高品質な画像圧縮ツール|ゴーストツールズ" },
+    { property: "og:description", content: "ゴーストツールズは、高品質かつ安全な画像圧縮ツールを提供します。オフラインで動作し、アップロード不要で簡単に画像サイズを軽量化できます。" },
+    { property: "og:type", content: "website" },
+    { property: "og:url", content: "https://ghost-tools.site/image-compress" },
+  ];
+};
 
 export default function Index() {
   const [error, setError] = useState<string | null>(null);
@@ -143,7 +156,7 @@ export default function Index() {
         <div className="bg-white rounded-xl shadow p-4 sm:p-7">
           <div className="grid sm:grid-cols-12 gap-2 sm:gap-4 py-8 first:pt-0 last:pb-0 border-t first:border-transparent border-gray-200">
             <div className="sm:col-span-12">
-              <h2 className="text-lg font-semibold text-gray-800">画像圧縮</h2>
+              <h1 className="text-lg font-semibold text-gray-800">画像圧縮</h1>
             </div>
             <div className="sm:col-span-12">
               <ul className="list-disc space-y-1 ps-5 text-md text-gray-800 mb-4">

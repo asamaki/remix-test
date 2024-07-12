@@ -5,12 +5,17 @@ import {
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "ゴーストツール 安全に利用できるツールたち" },
+    { title: "ゴーストツールズ | 安全に使えるWEBツール" },
     {
       name: "description",
       content:
-        "ゴーストツールは、アップロードされたデータをすぐに削除するので安心して使えます。安全なツールです。",
+        "ゴーストツールズは、安全性にこだわったWebツールサイトです。オフライン機能を中心に、便利で安心なツールを集めました。",
     },
+    { name: "keywords", content: "安全,安心,ツール,オフライン,無料,プライバシー保護,画像編集,アップロードなし" },
+    { property: "og:title", content: "ゴーストツールズ | 安全に使えるWEBツール" },
+    { property: "og:description", content: "ゴーストツールズは、安全性にこだわったWebツールサイトです。オフライン機能を中心に、便利で安心なツールを集めました。" },
+    { property: "og:type", content: "website" },
+    { property: "og:url", content: "https://ghost-tools.site/face-mosaic" },
   ];
 };
 
@@ -23,7 +28,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export default function Index() {
   return (
-    <div className="max-w-[85rem] px-4 py-8 sm:px-6 lg:px-8 lg:py-14 mx-auto">
+    <div className="max-w-[85rem] px-4 py-4 sm:px-6 lg:px-8 lg:py-14 mx-auto">
       <ul className="list-disc space-y-1 ps-5 text-md text-gray-800 mb-4">
         <li className="ps-1">
           ゴーストツールは、アップロードされたデータをすぐに削除します。

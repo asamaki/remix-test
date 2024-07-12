@@ -1,5 +1,18 @@
 import React, { useState, useRef } from "react";
 import imageCompression from "browser-image-compression";
+import { MetaFunction } from "@remix-run/node";
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "画像サイズ変更 簡単・高品質なリサイズツール|ゴーストツールズ" },
+    { name: "description", content: "ゴーストツールズは、安全で使いやすい画像サイズ変更ツールを提供します。オフラインで動作し、アップロード不要で簡単に画像のリサイズが可能です。" },
+    { name: "keywords", content: "画像サイズ変更,リサイズ,画像編集,オフライン,プライバシー保護,ゴーストツールズ" },
+    { property: "og:title", content: "画像サイズ変更 簡単・高品質なリサイズツール|ゴーストツールズ" },
+    { property: "og:description", content: "ゴーストツールズは、安全で使いやすい画像サイズ変更ツールを提供します。オフラインで動作し、アップロード不要で簡単に画像のリサイズが可能です。" },
+    { property: "og:type", content: "website" },
+    { property: "og:url", content: "https://ghost-tools.site/image-size-conversion" },
+  ];
+};
 
 export default function Index() {
   const [error, setError] = useState<string | null>(null);

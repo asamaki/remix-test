@@ -7,15 +7,20 @@ import {
 } from "@remix-run/react";
 import { createCookie } from "@remix-run/node";
 import React, { useState } from "react";
-
 import { s3UploadHandler } from "~/utils/s3.server";
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "New Remix App" },
-    { name: "description", content: "Welcome to Remix!" },
+    { title: "画像サイズ変更 簡単・高品質なリサイズツール|ゴーストツールズ" },
+    { name: "description", content: "ゴーストツールズは、安全で使いやすい画像サイズ変更ツールを提供します。オフラインで動作し、アップロード不要で簡単に画像のリサイズが可能です。" },
+    { name: "keywords", content: "画像サイズ変更,リサイズ,画像編集,オフライン,プライバシー保護,ゴーストツールズ" },
+    { property: "og:title", content: "画像サイズ変更 簡単・高品質なリサイズツール|ゴーストツールズ" },
+    { property: "og:description", content: "ゴーストツールズは、安全で使いやすい画像サイズ変更ツールを提供します。オフラインで動作し、アップロード不要で簡単に画像のリサイズが可能です。" },
+    { property: "og:type", content: "website" },
+    { property: "og:url", content: "https://ghost-tools.site/image-conversion" },
   ];
 };
+
 
 import type { ActionFunctionArgs, UploadHandler } from "@remix-run/node";
 import {
@@ -70,7 +75,7 @@ export default function Index() {
       <div className="bg-white rounded-xl shadow p-4 sm:p-7">
         <div className="grid sm:grid-cols-12 gap-2 sm:gap-4 py-8 first:pt-0 last:pb-0 border-t first:border-transparent border-gray-200">
           <div className="sm:col-span-12">
-            <h2 className="text-lg font-semibold text-gray-800">画像変換</h2>
+            <h1 className="text-lg font-semibold text-gray-800">画像変換</h1>
           </div>
 
           <div className="sm:col-span-12">

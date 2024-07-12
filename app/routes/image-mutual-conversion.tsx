@@ -1,5 +1,18 @@
 import React, { useState, useRef } from "react";
 import imageCompression from "browser-image-compression";
+import { MetaFunction } from "@remix-run/node";
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "画像PNG/JPG変換 簡単・高品質なフォーマット変換ツール|ゴーストツールズ" },
+    { name: "description", content: "ゴーストツールズは、安全で便利な画像フォーマット変換ツールを提供します。オフラインで動作し、アップロード不要でPNGとJPG間の変換が簡単に行えます。" },
+    { name: "keywords", content: "画像変換,PNG,JPG,JPEG,フォーマット変更,オフライン,プライバシー保護,ゴーストツールズ" },
+    { property: "og:title", content: "画像PNG/JPG変換 簡単・高品質なフォーマット変換ツール|ゴーストツールズ" },
+    { property: "og:description", content: "ゴーストツールズは、安全で便利な画像フォーマット変換ツールを提供します。オフラインで動作し、アップロード不要でPNGとJPG間の変換が簡単に行えます。" },
+    { property: "og:type", content: "website" },
+    { property: "og:url", content: "https://ghost-tools.site/image-format-conversion" },
+  ];
+};
 
 export default function Index() {
   const [error, setError] = useState<string | null>(null);
@@ -119,7 +132,7 @@ export default function Index() {
         <div className="bg-white rounded-xl shadow p-4 sm:p-7">
           <div className="grid sm:grid-cols-12 gap-2 sm:gap-4 py-8 first:pt-0 last:pb-0 border-t first:border-transparent border-gray-200">
             <div className="sm:col-span-12">
-              <h2 className="text-lg font-semibold text-gray-800">画像形式変換</h2>
+              <h1 className="text-lg font-semibold text-gray-800">画像PNG/JPG変換</h1>
             </div>
             <div className="sm:col-span-12">
               <ul className="list-disc space-y-1 ps-5 text-md text-gray-800 mb-4">
