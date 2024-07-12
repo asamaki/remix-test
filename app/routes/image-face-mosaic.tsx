@@ -20,10 +20,11 @@ export default function FaceMosaic() {
   const [effectSize, setEffectSize] = useState(10);
   const [blurSize, setBlurSize] = useState(3);
   const [effectType, setEffectType] = useState('mosaic');
-  const [detectionSensitivity, setDetectionSensitivity] = useState(5);
+  const [detectionSensitivity, setDetectionSensitivity] = useState(50);
   const [lineThickness, setLineThickness] = useState(5); // 目隠し帯の太さ
   const [lineLength, setLineLength] = useState(100); // 目隠し帯の長さ（パーセント）
   const canvasRef = useRef(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     const loadModels = async () => {
@@ -98,6 +99,7 @@ export default function FaceMosaic() {
 
   const applyEffect = useCallback(() => {
     if (!originalImage) return;
+    setIsProcessing(true);  // 処理開始時にフラグを設定
 
     const img = new Image();
     img.onload = async () => {
@@ -148,6 +150,7 @@ export default function FaceMosaic() {
 
       const newProcessedImage = canvas.toDataURL();
       setProcessedImage(newProcessedImage);
+      setIsProcessing(false);  // 処理完了時にフラグをリセット
     };
     img.src = originalImage;
   }, [originalImage, effectType, effectSize, blurSize, detectionSensitivity, lineThickness, lineLength]);
@@ -211,8 +214,8 @@ export default function FaceMosaic() {
               <input
                 id="effectSize"
                 type="range"
-                min={effectType === 'mosaic' ? 5 : 1}
-                max={effectType === 'mosaic' ? 50 : 20}
+                min={effectType === 'mosaic' ? 1 : 1}
+                max={effectType === 'mosaic' ? 50 : 50}
                 value={effectType === 'mosaic' ? effectSize : blurSize}
                 onChange={(e) => effectType === 'mosaic' ? setEffectSize(Number(e.target.value)) : setBlurSize(Number(e.target.value))}
                 className="w-full"
@@ -229,7 +232,7 @@ export default function FaceMosaic() {
                   id="lineThickness"
                   type="range"
                   min="1"
-                  max="20"
+                  max="50"
                   value={lineThickness}
                   onChange={(e) => setLineThickness(Number(e.target.value))}
                   className="w-full"
@@ -243,7 +246,7 @@ export default function FaceMosaic() {
                   id="lineLength"
                   type="range"
                   min="50"
-                  max="150"
+                  max="200"
                   value={lineLength}
                   onChange={(e) => setLineLength(Number(e.target.value))}
                   className="w-full"
@@ -267,23 +270,23 @@ export default function FaceMosaic() {
             />
           </div>
           <button
-            onClick={applyEffect}
-            className="mb-6 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-4"
-          >
-            エフェクトを適用
-          </button>
-        </section>
-      )}
-
-      {processedImage && (
-        <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">処理済み画像</h2>
-          <button
-            onClick={handleDownload}
-            className="mb-6 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-          >
-            画像をダウンロード
-          </button>
+  onClick={applyEffect}
+  disabled={isProcessing}
+  className={`mb-6 font-bold py-2 px-4 rounded mr-4 ${
+    isProcessing
+      ? 'bg-gray-400 cursor-not-allowed'
+      : 'bg-blue-500 hover:bg-blue-700 text-white'
+  }`}
+>
+  {isProcessing ? (
+    <>
+      <span className="animate-spin inline-block mr-2">&#9696;</span>
+      処理中...
+    </>
+  ) : (
+    'エフェクトを適用'
+  )}
+</button>
         </section>
       )}
 
@@ -298,11 +301,23 @@ export default function FaceMosaic() {
         </div>
         <div>
           <h2 className="text-xl font-semibold mb-2">処理後の画像</h2>
-          {processedImage && (
-            <div className="border border-gray-300 rounded-lg overflow-hidden">
-              <img src={processedImage} alt="顔にモザイク、ぼかし、または目隠しを適用した加工後の画像" className="w-full h-auto object-contain" />
-            </div>
-          )}
+          {isProcessing ? (
+    <div className="flex justify-center items-center h-64">
+      <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
+    </div>
+  ) : processedImage ? (
+    <>
+      <div className="border border-gray-300 rounded-lg overflow-hidden">
+        <img src={processedImage} alt="顔にモザイク、ぼかし、または目隠しを適用した加工後の画像" className="w-full h-auto object-contain" />
+      </div>
+      <button
+        onClick={handleDownload}
+        className="my-6 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+      >
+        画像をダウンロード
+      </button>
+    </>
+  ) : null}
           <canvas ref={canvasRef} className={processedImage ? 'hidden' : 'w-full h-auto'} />
         </div>
       </section>
