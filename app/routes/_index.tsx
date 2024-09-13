@@ -2,6 +2,7 @@ import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import {
   json,
 } from "@remix-run/react";
+import { FeatherIcon, ZapIcon, ShieldIcon } from "lucide-react"
 
 export const meta: MetaFunction = () => {
   return [
@@ -21,6 +22,22 @@ export const meta: MetaFunction = () => {
 
 export const date = new Date();
 
+const services = [
+  { name: "画像圧縮", description: "画像をアップロードせずに圧縮", link: "/image-compress" },
+  { name: "画像サイズ変換", description: "画像をアップロードせずに縦横サイズ変換", link: "/image-size-conversion" },
+  { name: "画像PNG/JPG変換", description: "画像のPNG/JPGを相互に変換します", link: "/image-mutual-conversion" },
+  { name: "画像背景透過", description: "画像の背景を透過します。", link: "/image-background-removal" },
+  { name: "くじ引き・抽選", description: "数字や名前のリストからランダムに抽選します", link: "/lottery" },
+  { name: "顔モザイク・ぼかしツール", description: "画像内の顔を自動検出し、モザイクやぼかしで画像を加工できます", link: "/image-face-mosaic" },
+  { name: "QRコード生成", description: "QRコードを生成できます。", link: "/qrcode" }
+]
+
+const conceptPoints = [
+  { icon: ShieldIcon, title: "シンプル", description: "ちょっとしたツールをすぐに利用できる" },
+  { icon: FeatherIcon, title: "安全", description: "アップロードが必要ない場合はすべてブラウザで処理" },
+  { icon: ZapIcon, title: "保護", description: "アップロードしたファイルは即時削除" }, 
+]
+
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   let { searchParams } = new URL(request.url);
   return json({ date: date, view: searchParams.get("view") });
@@ -28,253 +45,38 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export default function Index() {
   return (
-    <div className="max-w-[85rem] px-4 py-4 sm:px-6 lg:px-8 lg:py-14 mx-auto">
-      <ul className="list-disc space-y-1 ps-5 text-md text-gray-800 mb-4">
-        <li className="ps-1">
-          ゴーストツールは、アップロードされたデータをすぐに削除します。
-        </li>
-        <li className="ps-1">
-          アップロードが必要ない場合は、すべてブラウザで処理されます。
-        </li>
-      </ul>
-      <div className="grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
-        <a
-          className="group flex flex-col bg-white border shadow-sm rounded-xl hover:shadow-md transition"
-          href="/image-compress"
-        >
-          <div className="p-4 md:p-5">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="group-hover:text-blue-600 font-semibold text-gray-800">
-                  画像圧縮
-                </h3>
-                <p className="text-sm text-gray-500">
-                  画像をアップロードせずに圧縮
-                </p>
-              </div>
-              <div className="ps-3">
-                <svg
-                  className="flex-shrink-0 size-5 text-gray-800"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="m9 18 6-6-6-6" />
-                </svg>
-              </div>
-            </div>
-          </div>
-        </a>
-
-        <a
-          className="group flex flex-col bg-white border shadow-sm rounded-xl hover:shadow-md transition"
-          href="/image-size-conversion"
-        >
-          <div className="p-4 md:p-5">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="group-hover:text-blue-600 font-semibold text-gray-800">
-                  画像サイズ変換
-                </h3>
-                <p className="text-sm text-gray-500">
-                  画像をアップロードせずに縦横サイズ変換
-                </p>
-              </div>
-              <div className="ps-3">
-                <svg
-                  className="flex-shrink-0 size-5 text-gray-800"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="m9 18 6-6-6-6" />
-                </svg>
-              </div>
-            </div>
-          </div>
-        </a>
+    <div className="min-h-screen flex flex-col bg-white text-gray-800">
 
 
-        <a
-          className="group flex flex-col bg-white border shadow-sm rounded-xl hover:shadow-md transition"
-          href="/image-mutual-conversion"
-        >
-          <div className="p-4 md:p-5">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="group-hover:text-blue-600 font-semibold text-gray-800">
-                  画像PNG/JPG変換
-                </h3>
-                <p className="text-sm text-gray-500">
-                  画像のPNG/JPGを相互に変換します
-                </p>
+      <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="py-20">
+          <h2 className="text-4xl font-bold text-center mb-12 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">ちょっと便利を安全に</h2>
+          <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
+            {conceptPoints.map((point, index) => (
+              <div key={index} className="text-center">
+                <point.icon className="h-12 w-12 mx-auto mb-4 text-blue-600" />
+                <h3 className="text-xl font-semibold mb-2">{point.title}</h3>
+                <p className="text-gray-600">{point.description}</p>
               </div>
-              <div className="ps-3">
-                <svg
-                  className="flex-shrink-0 size-5 text-gray-800"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="m9 18 6-6-6-6" />
-                </svg>
-              </div>
-            </div>
+            ))}
           </div>
-        </a>
-        <a
-          className="group flex flex-col bg-white border shadow-sm rounded-xl hover:shadow-md transition"
-          href="/image-background-removal"
-        >
-          <div className="p-4 md:p-5">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="group-hover:text-blue-600 font-semibold text-gray-800">
-                  画像背景透過
-                </h3>
-                <p className="text-sm text-gray-500">
-                  画像の背景を透過します。
-                </p>
-              </div>
-              <div className="ps-3">
-                <svg
-                  className="flex-shrink-0 size-5 text-gray-800"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="m9 18 6-6-6-6" />
-                </svg>
-              </div>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {services.map((service, i) => (
+              <a
+                key={i}
+                href={service.link}
+                className="group flex flex-col bg-white border border-gray-100 shadow-sm rounded-xl hover:shadow-md transition duration-300"
+              >
+                <div className="p-6 rounded-xl">
+                  <h3 className="text-xl font-semibold mb-3 group-hover:text-blue-600 transition-colors duration-300">{service.name}</h3>
+                  <p className="text-gray-600">{service.description}</p>
+                </div>
+              </a>
+            ))}
           </div>
-        </a>
-        <a
-          className="group flex flex-col bg-white border shadow-sm rounded-xl hover:shadow-md transition"
-          href="/lottery"
-        >
-          <div className="p-4 md:p-5">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="group-hover:text-blue-600 font-semibold text-gray-800">
-                  くじ引き・抽選
-                </h3>
-                <p className="text-sm text-gray-500">
-                  数字や名前のリストからランダムに抽選します
-                </p>
-              </div>
-              <div className="ps-3">
-                <svg
-                  className="flex-shrink-0 size-5 text-gray-800"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="m9 18 6-6-6-6" />
-                </svg>
-              </div>
-            </div>
-          </div>
-        </a>
-        <a
-          className="group flex flex-col bg-white border shadow-sm rounded-xl hover:shadow-md transition"
-          href="/image-face-mosaic"
-        >
-          <div className="p-4 md:p-5">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="group-hover:text-blue-600 font-semibold text-gray-800">
-                顔モザイク・ぼかしツール
-                </h3>
-                <p className="text-sm text-gray-500">
-                画像内の顔を自動検出し、モザイクやぼかしで画像を加工できます
-                </p>
-              </div>
-              <div className="ps-3">
-                <svg
-                  className="flex-shrink-0 size-5 text-gray-800"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="m9 18 6-6-6-6" />
-                </svg>
-              </div>
-            </div>
-          </div>
-        </a>
-        <a
-          className="group flex flex-col bg-white border shadow-sm rounded-xl hover:shadow-md transition"
-          href="/qrcode"
-        >
-          <div className="p-4 md:p-5">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="group-hover:text-blue-600 font-semibold text-gray-800">
-                QRコード生成
-                </h3>
-                <p className="text-sm text-gray-500">
-                QRコードを生成できます。
-                </p>
-              </div>
-              <div className="ps-3">
-                <svg
-                  className="flex-shrink-0 size-5 text-gray-800"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="m9 18 6-6-6-6" />
-                </svg>
-              </div>
-            </div>
-          </div>
-        </a>
+        </section>
+      </main>
 
-
-      </div>
     </div>
-  );
+  )
 }

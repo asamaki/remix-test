@@ -14,6 +14,7 @@ import PrelineScript from "~/components/preline.client";
 import HeaderIcon from "/public/icon-ghost-tools.png"
 import { useEffect } from "react";
 import * as gtag from "~/utils/gtags.client";
+import { GhostIcon } from "lucide-react"
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
@@ -64,21 +65,32 @@ export function Layout({ children }: { children: React.ReactNode }) {
             />
           </>
         )}
-      <body >
-          <header className="flex flex-wrap sm:justify-start sm:flex-nowrap z-50 w-full bg-primary-950 text-sm py-3 sm:py-0 ">
-            <nav className="relative max-w-[85rem] w-full mx-auto px-4 sm:flex sm:items-center sm:justify-between sm:px-6 lg:px-8" aria-label="Global">
-              <div className="flex items-center justify-between sm:my-4 sm:ps-4">
-                
-                
-                <a className="flex-none text-xl font-semibold text-white" href="/" aria-label="Brand"><img className="inline-block size-[34px] mr-2" src={HeaderIcon} alt="Image Description"/>ゴーストツールズ</a>
-              </div>
-            </nav>
+      <body>
+        <div className="min-h-screen flex flex-col bg-white text-gray-800">
+          <header className="py-6 px-8 flex justify-between items-center border-b border-gray-200">
+            <div className="flex items-center space-x-2">
+              <GhostIcon className="h-8 w-8 text-blue-600" />
+              <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">ゴーストツールズ</span>
+            </div>
+            {/* <nav>
+              <ul className="flex space-x-6">
+                {["ホーム", "サービス", "会社概要", "お問い合わせ"].map((item) => (
+                  <li key={item}>
+                    <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors duration-300">{item}</a>
+                  </li>
+                ))}
+              </ul>
+            </nav> */}
           </header>
-        {children}
-        <ScrollRestoration />
-        <Scripts />
-        {/* Add preline script on every page */}
-        {PrelineScript && <PrelineScript />}
+          {children}
+          <ScrollRestoration />
+          <Scripts />
+          {/* Add preline script on every page */}
+          {PrelineScript && <PrelineScript />}
+          <footer className="py-8 px-8 bg-gray-50 text-center">
+        <p className="text-gray-600">&copy; 2024 Ghost Tools. All rights reserved.</p>
+      </footer>
+        </div>
       </body>
     </html>
   );
