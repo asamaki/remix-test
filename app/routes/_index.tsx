@@ -48,7 +48,7 @@ export default function Index() {
 <main className="flex-grow">
         <section className="py-20">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-4xl font-bold text-center mb-12 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">幽霊の力を解き放つ</h2>
+            <h2 className="text-4xl font-bold text-center mb-12 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">ちょっと便利を安全に</h2>
             <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
               {conceptPoints.map((point, index) => (
                 <div key={index} className="text-center">
