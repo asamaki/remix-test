@@ -1,6 +1,12 @@
 import React, { useState, useRef } from "react";
 import imageCompression from "browser-image-compression";
 import { MetaFunction } from "@remix-run/node";
+import { GhostIcon, Upload, Download, Info, Image as ImageIcon } from "lucide-react";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Slider } from "~/components/ui/slider";
+import { Card, CardContent } from "~/components/ui/card";
+import { Alert, AlertDescription } from "~/components/ui/alert";
 
 export const meta: MetaFunction = () => {
   return [
@@ -14,13 +20,13 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export default function Index() {
+export default function ImageCompress() {
   const [error, setError] = useState<string | null>(null);
   const [images, setImages] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [compressing, setCompressing] = useState<boolean>(false);
-  const [compressionRate, setCompressionRate] = useState<number>(50); // デフォルトは50%
-  const [progress, setProgress] = useState<number>(0); // 進捗率を管理
+  const [compressionRate, setCompressionRate] = useState<number>(50);
+  const [progress, setProgress] = useState<number>(0);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -151,155 +157,104 @@ export default function Index() {
   };
 
   return (
-    <>
-      <div className="max-w-4xl px-4 py-10 sm:px-4 lg:px-8 lg:py-8 mx-auto">
-        <div className="bg-white rounded-xl shadow p-4 sm:p-7">
-          <div className="grid sm:grid-cols-12 gap-2 sm:gap-4 py-8 first:pt-0 last:pb-0 border-t first:border-transparent border-gray-200">
-            <div className="sm:col-span-12">
-              <h1 className="text-lg font-semibold text-gray-800">画像圧縮</h1>
-            </div>
-            <div className="sm:col-span-12">
-              <ul className="list-disc space-y-1 ps-5 text-md text-gray-800 mb-4">
-                <li className="ps-1">画像を圧縮できます。</li>
-                <li className="ps-1">
-                  アップロードは行われず、すべてブラウザで処理されます。
-                </li>
-                <li className="ps-1">一度に選択できる画像の最大枚数は3枚です</li>
+      <main className="flex-grow py-12">
+        <div className="container mx-auto px-4 max-w-3xl">
+          <h1 className="text-4xl font-bold text-center mb-8 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">画像圧縮</h1>
+          
+          <Alert className="mb-8">
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              <ul className="list-disc list-inside">
+                <li>画像を圧縮できます。</li>
+                <li>アップロードは行われず、すべてブラウザで処理されます。</li>
+                <li>一度に選択できる画像の最大枚数は3枚です</li>
               </ul>
+            </AlertDescription>
+          </Alert>
 
-              <form>
-                <input
-                  type="file"
-                  name="img"
-                  accept="image/*"
-                  multiple
-                  onChange={handleFileChange}
-                  ref={fileInputRef}
-                  className="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none
-                        file:bg-gray-50 file:border-0
-                        file:bg-gray-100 file:me-4
-                        file:py-2 file:px-4
-                      "
-                />
-                {error ? <h2>{error}</h2> : null}
-                {loading ? <p>画像を読み込み中...</p> : null}
+          <Card className="mb-8">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-center w-full">
+                <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <ImageIcon className="w-10 h-10 mb-3 text-gray-400" />
+                    <p className="mb-2 text-sm text-gray-500"><span className="font-semibold">クリックして画像を選択</span>またはドラッグ＆ドロップ</p>
+                    <p className="text-xs text-gray-500">PNG, JPG, GIF (最大3枚まで)</p>
+                  </div>
+                  <Input id="dropzone-file" type="file" accept="image/*" multiple className="hidden" onChange={handleFileChange} ref={fileInputRef} />
+                </label>
+              </div>
+              {error && <p className="text-red-500 mt-2">{error}</p>}
+              {loading && <p className="text-blue-500 mt-2">画像を読み込み中...</p>}
+            </CardContent>
+          </Card>
 
-                {images.length > 0 && (
-                  <>
-                    <h2 className="mt-4">読み込まれた画像（アップロードされていません）</h2>
-                    <div className="flex flex-wrap">
-                      {images.map((image, index) => (
-                        <div key={index} className="m-2 p-2 border rounded-lg">
-                          <img
-                            className="my-4"
-                            alt="uploaded"
-                            src={image.imgSrc}
-                            style={{ maxWidth: "100px" }}
-                          />
-                          <p>
-                            {image.imageSize.toFixed(2)}MB {image.imageWidth}×{image.imageHeight} {image.imgSrc.includes('jpeg') || image.imgSrc.includes('jpg') ? 'JPG' : 'PNG'}
+          {images.length > 0 && (
+            <Card className="mb-8">
+              <CardContent className="p-6">
+                <h2 className="text-lg font-semibold mb-4">圧縮設定</h2>
+                <div className="flex items-center space-x-4 mb-6">
+                  <span className="text-sm font-medium min-w-[80px]">圧縮率:</span>
+                  <Slider
+                    value={[compressionRate]}
+                    onValueChange={(value) => setCompressionRate(value[0])}
+                    max={99.9}
+                    step={0.1}
+                    className="flex-grow"
+                  />
+                  <span className="text-sm font-medium min-w-[40px] text-right">{compressionRate.toFixed(1)}%</span>
+                </div>
+                <div className="mb-6">
+                  <p className="font-medium mb-2">元の画像</p>
+                  <div className="flex flex-wrap gap-4">
+                    {images.map((image, index) => (
+                      <div key={index} className="w-1/3">
+                        <div className="aspect-video bg-gray-100 rounded flex items-center justify-center overflow-hidden">
+                          <img src={image.imgSrc} alt={`Original ${index + 1}`} className="object-cover w-full h-full" />
+                        </div>
+                        <p className="mt-2 text-sm text-center text-gray-500">
+                          {image.imageSize.toFixed(2)}MB {image.imageWidth}×{image.imageHeight} {image.imgSrc.includes('jpeg') || image.imgSrc.includes('jpg') ? 'JPG' : 'PNG'}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={handleCompress} disabled={compressing}>
+                  <Upload className="mr-2 h-4 w-4" /> 画像を圧縮
+                </Button>
+                {compressing && <p className="text-blue-500 mt-2">画像を圧縮中... ({progress.toFixed(0)}%)</p>}
+              </CardContent>
+            </Card>
+          )}
+
+          {images.some((image) => image.compressedImgSrc) && (
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="text-lg font-semibold mb-4">圧縮結果</h2>
+                <div className="mb-6">
+                  <p className="font-medium mb-2">圧縮後の画像</p>
+                  <div className="flex flex-wrap gap-4">
+                    {images.map((image, index) => (
+                      image.compressedImgSrc && (
+                        <div key={index} className="w-1/3">
+                          <div className="aspect-video bg-gray-100 rounded flex items-center justify-center overflow-hidden">
+                            <img src={image.compressedImgSrc} alt={`Compressed ${index + 1}`} className="object-cover w-full h-full" />
+                          </div>
+                          <p className="mt-2 text-sm text-center text-gray-500">
+                            {image.compressedImageSize?.toFixed(2)}MB {image.compressedImageWidth}×{image.compressedImageHeight} {image.compressedImgSrc.includes('jpeg') || image.compressedImgSrc.includes('jpg') ? 'JPG' : 'PNG'}
                           </p>
                         </div>
-                      ))}
-                    </div>
-                    
-                    <div className="mt-4">
-                      <label className="block text-sm font-medium text-gray-700">
-                        圧縮率 {compressionRate}%
-                      </label>
-
-                      <input
-                        type="range"
-                        className="w-full bg-transparent cursor-pointer appearance-none disabled:opacity-50 disabled:pointer-events-none focus:outline-none mb-4
-                        [&::-webkit-slider-thumb]:w-5
-                        [&::-webkit-slider-thumb]:h-5
-                        [&::-webkit-slider-thumb]:-mt-1.5
-                        [&::-webkit-slider-thumb]:appearance-none
-                        [&::-webkit-slider-thumb]:bg-white
-                        [&::-webkit-slider-thumb]:shadow-[0_0_0_4px_rgba(37,99,235,1)]
-                        [&::-webkit-slider-thumb]:rounded-full
-                        [&::-webkit-slider-thumb]:transition-all
-                        [&::-webkit-slider-thumb]:duration-150
-                        [&::-webkit-slider-thumb]:ease-in-out
-
-                        [&::-moz-range-thumb]:w-5
-                        [&::-moz-range-thumb]:h-5
-                        [&::-moz-range-thumb]:appearance-none
-                        [&::-moz-range-thumb]:bg-white
-                        [&::-moz-range-thumb]:border-4
-                        [&::-moz-range-thumb]:border-blue-600
-                        [&::-moz-range-thumb]:rounded-full
-                        [&::-moz-range-thumb]:transition-all
-                        [&::-moz-range-thumb]:duration-150
-                        [&::-moz-range-thumb]:ease-in-out
-
-                        [&::-webkit-slider-runnable-track]:w-full
-                        [&::-webkit-slider-runnable-track]:h-2
-                        [&::-webkit-slider-runnable-track]:bg-gray-100
-                        [&::-webkit-slider-runnable-track]:rounded-full
-                        [&::-webkit-slider-runnable-track]:
-
-                        [&::-moz-range-track]:w-full
-                        [&::-moz-range-track]:h-2
-                        [&::-moz-range-track]:bg-gray-100
-                        [&::-moz-range-track]:rounded-full"
-                        id="basic-range-slider-usage"
-                        value={compressionRate}
-                        min={0.1}
-                        max={99.9}
-                        step={0.1}
-                        onChange={(e) =>
-                          setCompressionRate(Number(e.target.value))
-                        }
-                      ></input>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={handleCompress}
-                      className="w-full my-4 py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
-                    >
-                      画像を圧縮（アップロードなし）
-                    </button>
-                    {compressing ? <p>画像を圧縮中... ({progress.toFixed(0)}%)</p> : null}
-                  </>
-                )}
-              </form>
-
-              {images.some((image) => image.compressedImgSrc) && (
-                <>
-                  <h2>圧縮された画像</h2>
-                  <div className="flex flex-wrap">
-                    {images.map(
-                      (image, index) =>
-                        image.compressedImgSrc && (
-                          <div key={index} className="m-2 p-2 border rounded-lg">
-                            <img
-                              alt="compressed"
-                              src={image.compressedImgSrc}
-                              style={{ maxWidth: "100px" }}
-                            />
-                            <p>
-                              {image.compressedImageSize?.toFixed(2)}MB {image.compressedImageWidth}×
-                              {image.compressedImageHeight} {image.compressedImgSrc.includes('jpeg') || image.compressedImgSrc.includes('jpg') ? 'JPG' : 'PNG'}
-                            </p>
-                          </div>
-                        )
-                    )}
+                      )
+                    ))}
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleDownloadAll}
-                    className="w-full my-4 py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
-                  >
-                    すべてダウンロード
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
+                </div>
+                <Button className="w-full bg-green-600 hover:bg-green-700" onClick={handleDownloadAll}>
+                  <Download className="mr-2 h-4 w-4" /> 圧縮画像をダウンロード
+                </Button>
+              </CardContent>
+            </Card>
+          )}
         </div>
-      </div>
-    </>
+      </main>
   );
 }

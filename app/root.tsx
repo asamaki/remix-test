@@ -67,29 +67,35 @@ export function Layout({ children }: { children: React.ReactNode }) {
         )}
       <body>
         <div className="min-h-screen flex flex-col bg-white text-gray-800">
-          <header className="py-6 px-8 flex justify-between items-center border-b border-gray-200">
-            <div className="flex items-center space-x-2">
-              <GhostIcon className="h-8 w-8 text-blue-600" />
-              <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">ゴーストツールズ</span>
+          <header className="py-6 border-b border-gray-200">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center space-x-2">
+                  <GhostIcon className="h-8 w-8 text-blue-600" />
+                  <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">ゴーストツールズ</span>
+                </div>
+                {/* <nav>
+                  <ul className="flex space-x-6">
+                    {["ホーム", "サービス", "会社概要", "お問い合わせ"].map((item) => (
+                      <li key={item}>
+                        <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors duration-300">{item}</a>
+                      </li>
+                    ))}
+                  </ul>
+                </nav> */}
+              </div>
             </div>
-            {/* <nav>
-              <ul className="flex space-x-6">
-                {["ホーム", "サービス", "会社概要", "お問い合わせ"].map((item) => (
-                  <li key={item}>
-                    <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors duration-300">{item}</a>
-                  </li>
-                ))}
-              </ul>
-            </nav> */}
           </header>
           {children}
           <ScrollRestoration />
           <Scripts />
           {/* Add preline script on every page */}
           {PrelineScript && <PrelineScript />}
-          <footer className="py-8 px-8 bg-gray-50 text-center">
-        <p className="text-gray-600">&copy; 2024 Ghost Tools. All rights reserved.</p>
-      </footer>
+          <footer className="py-8 bg-gray-50">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+              <p className="text-gray-600">&copy; 2024 Ghost Tools. All rights reserved.</p>
+            </div>
+          </footer>
         </div>
       </body>
     </html>
