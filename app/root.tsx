@@ -11,7 +11,6 @@ import {
 import type { LinksFunction } from "@remix-run/node";
 import stylesheet from "~/tailwind.css?url";
 import PrelineScript from "~/components/preline.client";
-import HeaderIcon from "/public/icon-ghost-tools.png"
 import { useEffect } from "react";
 import * as gtag from "~/utils/gtags.client";
 import { GhostIcon } from "lucide-react"
@@ -70,10 +69,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <header className="py-6 border-b border-gray-200">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex justify-between items-center">
-                <div className="flex items-center space-x-2">
-                  <GhostIcon className="h-8 w-8 text-blue-600" />
-                  <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">ゴーストツールズ</span>
-                </div>
+              <a href="/" className="flex items-center space-x-2">
+              <GhostIcon className="h-8 w-8 text-blue-600" />
+              <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">ゴーストツールズ</span>
+            </a>
                 {/* <nav>
                   <ul className="flex space-x-6">
                     {["ホーム", "サービス", "会社概要", "お問い合わせ"].map((item) => (
