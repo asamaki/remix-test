@@ -1,6 +1,12 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
 import * as faceapi from 'face-api.js';
 import { MetaFunction } from '@remix-run/node';
+import { GhostIcon, Upload, Download, Info, Image as ImageIcon } from "lucide-react";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Card, CardContent } from "~/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
+import { Slider } from "~/components/ui/slider";
 
 export const meta: MetaFunction = () => {
   return [
@@ -167,160 +173,171 @@ export default function FaceMosaic() {
   };
 
   return (
-    <main className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-4">顔モザイク・ぼかし・目隠しツール</h1>
-      
-      <ul className="mb-6 list-disc list-inside text-gray-600">
-        <li>画像内の顔を自動検出し、モザイク、ぼかし、または目隠しで画像を加工できます。</li>
-        <li>アップロードは行われず、すべてブラウザで処理されます。</li>
-      </ul>
-      
-      <section className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">画像選択</h2>
-        <div className="mb-6">
-          <input
-            id="imageUpload"
-            type="file"
-            onChange={handleImageUpload}
-            accept="image/*"
-            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-          />
-        </div>
-      </section>
-
-      {originalImage && (
-        <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">エフェクト設定</h2>
-          <div className="mb-6">
-            <label htmlFor="effectType" className="block text-sm font-medium text-gray-700 mb-2">
-              エフェクトタイプ
-            </label>
-            <select
-              id="effectType"
-              value={effectType}
-              onChange={(e) => setEffectType(e.target.value)}
-              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-            >
-              <option value="mosaic">モザイク</option>
-              <option value="blur">ぼかし</option>
-              <option value="eyeCover">目隠し</option>
-            </select>
+    <main className="flex-grow py-12">
+      <div className="container mx-auto px-4 max-w-3xl">
+        <h1 className="text-4xl font-bold text-center mb-8 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">顔モザイク・ぼかし・目隠しツール</h1>
+        
+        <div className="mb-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-start">
+            <Info className="h-5 w-5 text-blue-600 mr-2 mt-0.5" />
+            <div>
+              <ul className="list-disc list-inside text-blue-800">
+                <li>画像内の顔を自動検出し、モザイク、ぼかし、または目隠しで画像を加工できます。</li>
+                <li>アップロードは行われず、すべてブラウザで処理されます。</li>
+              </ul>
+            </div>
           </div>
-          {effectType !== 'eyeCover' && (
-            <div className="mb-6">
-              <label htmlFor="effectSize" className="block text-sm font-medium text-gray-700 mb-2">
-                {effectType === 'mosaic' ? 'モザイク' : 'ぼかし'}の強さ: {effectType === 'mosaic' ? effectSize : blurSize}px
+        </div>
+
+        <Card className="mb-8">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-center w-full">
+              <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <ImageIcon className="w-10 h-10 mb-3 text-gray-400" />
+                  <p className="mb-2 text-sm text-gray-500"><span className="font-semibold">クリックして画像を選択</span>またはドラッグ＆ドロップ</p>
+                  <p className="text-xs text-gray-500">PNG, JPG</p>
+                </div>
+                <Input id="dropzone-file" type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
               </label>
-              <input
-                id="effectSize"
-                type="range"
-                min={effectType === 'mosaic' ? 1 : 1}
-                max={effectType === 'mosaic' ? 50 : 50}
-                value={effectType === 'mosaic' ? effectSize : blurSize}
-                onChange={(e) => effectType === 'mosaic' ? setEffectSize(Number(e.target.value)) : setBlurSize(Number(e.target.value))}
-                className="w-full"
-              />
             </div>
-          )}
-          {effectType === 'eyeCover' && (
-            <>
-              <div className="mb-6">
-                <label htmlFor="lineThickness" className="block text-sm font-medium text-gray-700 mb-2">
-                  目隠し帯の太さ: {lineThickness}px
-                </label>
-                <input
-                  id="lineThickness"
-                  type="range"
-                  min="1"
-                  max="50"
-                  value={lineThickness}
-                  onChange={(e) => setLineThickness(Number(e.target.value))}
-                  className="w-full"
-                />
-              </div>
-              <div className="mb-6">
-                <label htmlFor="lineLength" className="block text-sm font-medium text-gray-700 mb-2">
-                  目隠し帯の長さ: {lineLength}%
-                </label>
-                <input
-                  id="lineLength"
-                  type="range"
-                  min="50"
-                  max="200"
-                  value={lineLength}
-                  onChange={(e) => setLineLength(Number(e.target.value))}
-                  className="w-full"
-                />
-              </div>
-            </>
-          )}
-          <div className="mb-6">
-            <label htmlFor="detectionSensitivity" className="block text-sm font-medium text-gray-700 mb-2">
-              顔認識の感度: {detectionSensitivity}
-            </label>
-            <input
-              id="detectionSensitivity"
-              type="range"
-              min="1"
-              max="99"
-              step="1"
-              value={detectionSensitivity}
-              onChange={(e) => setDetectionSensitivity(Number(e.target.value))}
-              className="w-full"
-            />
-          </div>
-          <button
-  onClick={applyEffect}
-  disabled={isProcessing}
-  className={`mb-6 font-bold py-2 px-4 rounded mr-4 ${
-    isProcessing
-      ? 'bg-gray-400 cursor-not-allowed'
-      : 'bg-blue-500 hover:bg-blue-700 text-white'
-  }`}
->
-  {isProcessing ? (
-    <>
-      <span className="animate-spin inline-block mr-2">&#9696;</span>
-      処理中...
-    </>
-  ) : (
-    'エフェクトを適用'
-  )}
-</button>
-        </section>
-      )}
+          </CardContent>
+        </Card>
 
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <h2 className="text-xl font-semibold mb-2">元の画像</h2>
+        {originalImage && (
+          <Card className="mb-8">
+            <CardContent className="p-6">
+              <h2 className="text-lg font-semibold mb-4">エフェクト設定</h2>
+              <div className="mb-6">
+                <label htmlFor="effectType" className="block text-sm font-medium text-gray-700 mb-2">
+                  エフェクトタイプ
+                </label>
+                <Select value={effectType} onValueChange={(value) => setEffectType(value)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="エフェクトを選択" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="mosaic">モザイク</SelectItem>
+                    <SelectItem value="blur">ぼかし</SelectItem>
+                    <SelectItem value="eyeCover">目隠し</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {effectType !== 'eyeCover' && (
+                <div className="mb-6">
+                  <label htmlFor="effectSize" className="block text-sm font-medium text-gray-700 mb-2">
+                    {effectType === 'mosaic' ? 'モザイク' : 'ぼかし'}の強さ: {effectType === 'mosaic' ? effectSize : blurSize}px
+                  </label>
+                  <Slider
+                    id="effectSize"
+                    min={effectType === 'mosaic' ? 1 : 1}
+                    max={effectType === 'mosaic' ? 50 : 50}
+                    value={[effectType === 'mosaic' ? effectSize : blurSize]}
+                    onValueChange={(value) => effectType === 'mosaic' ? setEffectSize(value[0]) : setBlurSize(value[0])}
+                    className="w-full"
+                  />
+                </div>
+              )}
+              {effectType === 'eyeCover' && (
+                <>
+                  <div className="mb-6">
+                    <label htmlFor="lineThickness" className="block text-sm font-medium text-gray-700 mb-2">
+                      目隠し帯の太さ: {lineThickness}px
+                    </label>
+                    <Slider
+                      id="lineThickness"
+                      min={1}
+                      max={50}
+                      value={[lineThickness]}
+                      onValueChange={(value) => setLineThickness(value[0])}
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="mb-6">
+                    <label htmlFor="lineLength" className="block text-sm font-medium text-gray-700 mb-2">
+                      目隠し帯の長さ: {lineLength}%
+                    </label>
+                    <Slider
+                      id="lineLength"
+                      min={50}
+                      max={200}
+                      value={[lineLength]}
+                      onValueChange={(value) => setLineLength(value[0])}
+                      className="w-full"
+                    />
+                  </div>
+                </>
+              )}
+              <div className="mb-6">
+                <label htmlFor="detectionSensitivity" className="block text-sm font-medium text-gray-700 mb-2">
+                  顔認識の感度: {detectionSensitivity}
+                </label>
+                <Slider
+                  id="detectionSensitivity"
+                  min={1}
+                  max={99}
+                  step={1}
+                  value={[detectionSensitivity]}
+                  onValueChange={(value) => setDetectionSensitivity(value[0])}
+                  className="w-full"
+                />
+              </div>
+              <Button
+                onClick={applyEffect}
+                disabled={isProcessing}
+                className="w-full bg-blue-600 hover:bg-blue-700"
+              >
+                {isProcessing ? (
+                  <>
+                    <span className="animate-spin inline-block mr-2">&#9696;</span>
+                    処理中...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="mr-2 h-4 w-4" /> エフェクトを適用
+                  </>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {originalImage && (
-            <div className="border border-gray-300 rounded-lg overflow-hidden">
-              <img src={originalImage} alt="加工前の元画像" className="w-full h-auto object-contain" />
-            </div>
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="text-lg font-semibold mb-4">元の画像</h2>
+                <div className="aspect-video bg-gray-100 rounded flex items-center justify-center overflow-hidden">
+                  <img src={originalImage} alt="加工前の元画像" className="object-cover w-full h-full" />
+                </div>
+              </CardContent>
+            </Card>
           )}
-        </div>
-        <div>
-          <h2 className="text-xl font-semibold mb-2">処理後の画像</h2>
           {isProcessing ? (
-    <div className="flex justify-center items-center h-64">
-      <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
-    </div>
-  ) : processedImage ? (
-    <>
-      <div className="border border-gray-300 rounded-lg overflow-hidden">
-        <img src={processedImage} alt="顔にモザイク、ぼかし、または目隠しを適用した加工後の画像" className="w-full h-auto object-contain" />
-      </div>
-      <button
-        onClick={handleDownload}
-        className="my-6 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-      >
-        画像をダウンロード
-      </button>
-    </>
-  ) : null}
-          <canvas ref={canvasRef} className={processedImage ? 'hidden' : 'w-full h-auto'} />
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="text-lg font-semibold mb-4">処理中...</h2>
+                <div className="aspect-video bg-gray-100 rounded flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
+                </div>
+              </CardContent>
+            </Card>
+          ) : processedImage ? (
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="text-lg font-semibold mb-4">処理後の画像</h2>
+                <div className="aspect-video bg-gray-100 rounded flex items-center justify-center overflow-hidden">
+                  <img src={processedImage} alt="顔にモザイク、ぼかし、または目隠しを適用した加工後の画像" className="object-cover w-full h-full" />
+                </div>
+                <Button onClick={handleDownload} className="w-full mt-4 bg-green-600 hover:bg-green-700">
+                  <Download className="mr-2 h-4 w-4" /> 画像をダウンロード
+                </Button>
+              </CardContent>
+            </Card>
+          ) : null}
         </div>
-      </section>
+        <canvas ref={canvasRef} className="hidden" />
+      </div>
     </main>
   );
 }

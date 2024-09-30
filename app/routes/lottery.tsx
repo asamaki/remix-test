@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Form } from '@remix-run/react';
 import { MetaFunction } from '@remix-run/node';
+import { GhostIcon, Info, Shuffle } from "lucide-react";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Card, CardContent } from "~/components/ui/card";
 
 export const meta: MetaFunction = () => {
   return [
@@ -60,38 +64,47 @@ export default function Index() {
   };
 
   return (
-    <div className="max-w-4xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
-      <div className="bg-white rounded-xl shadow p-4 sm:p-7">
-        <div className="grid sm:grid-cols-12 gap-2 sm:gap-4 py-8 first:pt-0 last:pb-0 border-t first:border-transparent border-gray-200">
-          <div className="sm:col-span-12">
-          <h1 className="text-lg font-semibold text-gray-800">くじ引き・抽選</h1>
-          <h2 className="text-sm text-gray-500">数字や名前のリストからランダムに抽選</h2>
+    <main className="flex-grow py-12">
+      <div className="container mx-auto px-4 max-w-3xl">
+        <h1 className="text-4xl font-bold text-center mb-8 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">くじ引き・抽選</h1>
+        
+        <div className="mb-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-start">
+            <Info className="h-5 w-5 text-blue-600 mr-2 mt-0.5" />
+            <div>
+              <ul className="list-disc list-inside text-blue-800">
+                <li>数字や名前のリストからランダムに抽選できます。</li>
+                <li>アップロードは行われず、すべてブラウザで処理されます。</li>
+              </ul>
+            </div>
           </div>
+        </div>
 
-          <div className="sm:col-span-12">
+        <Card className="mb-8">
+          <CardContent className="p-6">
             <Form method="post" onSubmit={handleSubmit}>
-              <div className="mb-4">
+              <div className="mb-4 flex items-center space-x-4">
                 <label className="inline-flex items-center">
-                  <input
+                  <Input
                     type="radio"
                     name="selectionType"
                     value="range"
                     checked={selectionType === 'range'}
                     onChange={(e) => setSelectionType(e.target.value)}
-                    className="form-radio text-blue-600"
+                    className="form-radio h-4 w-4 text-blue-600"
                   />
-                  <span className="ml-2">数字の範囲</span>
+                  <span className="ml-2 whitespace-nowrap">数字の範囲</span>
                 </label>
-                <label className="inline-flex items-center ml-4">
-                  <input
+                <label className="inline-flex items-center">
+                  <Input
                     type="radio"
                     name="selectionType"
                     value="names"
                     checked={selectionType === 'names'}
                     onChange={(e) => setSelectionType(e.target.value)}
-                    className="form-radio text-blue-600"
+                    className="form-radio h-4 w-4 text-blue-600"
                   />
-                  <span className="ml-2">名前リスト</span>
+                  <span className="ml-2 whitespace-nowrap">名前リスト</span>
                 </label>
               </div>
 
@@ -101,7 +114,7 @@ export default function Index() {
                     数字の範囲
                   </label>
                   <div className="flex space-x-2">
-                    <input
+                    <Input
                       type="number"
                       value={minRange}
                       onChange={(e) => setMinRange(e.target.value)}
@@ -109,7 +122,7 @@ export default function Index() {
                       className="py-3 px-4 block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none pr-4"
                     />
                     <span className="py-3 px-2" >〜</span>
-                    <input
+                    <Input
                       type="number"
                       value={maxRange}
                       onChange={(e) => setMaxRange(e.target.value)}
@@ -135,7 +148,7 @@ export default function Index() {
               <label className="block text-sm font-medium text-gray-700 mt-4">
                 結果発表までの時間 (秒)
               </label>
-              <input
+              <Input
                 type="number"
                 value={delay}
                 onChange={(e) => setDelay(e.target.value)}
@@ -143,29 +156,34 @@ export default function Index() {
                 min="1"
               />
 
-              <button
+              <Button
                 type="submit"
-                className="w-full my-4 py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
+                className="w-full my-4 bg-blue-600 hover:bg-blue-700"
               >
-                抽選
-              </button>
+                <Shuffle className="mr-2 h-4 w-4" /> 抽選
+              </Button>
             </Form>
-            {isAnimating && (
-                <div className="mt-4 p-4 border border-gray-500 rounded-lg">
-                    <p className="text-sm text-gray-500">抽選中</p>
-                    <p className="text-4xl text-gray-500 mr-4">{animationValue}</p>
-                </div>
+          </CardContent>
+        </Card>
 
-            )}
-            {result && (
-              <div className="mt-4 p-4 border border-green-500 rounded-lg">
-                    <p className="text-sm text-green-8700">結果</p>
-                    <p className="text-4xl text-green-700 mr-4">{result}</p>
-              </div>
-            )}
-          </div>
-        </div>
+        {isAnimating && (
+          <Card className="mb-8">
+            <CardContent className="p-6">
+              <h2 className="text-lg font-semibold mb-4">抽選中</h2>
+              <p className="text-4xl text-gray-500 mr-4">{animationValue}</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {result && (
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="text-lg font-semibold mb-4">結果</h2>
+              <p className="text-4xl text-green-700 mr-4">{result}</p>
+            </CardContent>
+          </Card>
+        )}
       </div>
-    </div>
+    </main>
   );
 }
