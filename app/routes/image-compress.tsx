@@ -161,16 +161,18 @@ export default function ImageCompress() {
         <div className="container mx-auto px-4 max-w-3xl">
           <h1 className="text-4xl font-bold text-center mb-8 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">画像圧縮</h1>
           
-          <Alert className="mb-8">
-            <Info className="h-4 w-4" />
-            <AlertDescription>
-              <ul className="list-disc list-inside">
-                <li>画像を圧縮できます。</li>
-                <li>アップロードは行われず、すべてブラウザで処理されます。</li>
-                <li>一度に選択できる画像の最大枚数は3枚です</li>
-              </ul>
-            </AlertDescription>
-          </Alert>
+          <div className="mb-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-start">
+              <Info className="h-5 w-5 text-blue-600 mr-2 mt-0.5" />
+              <div>
+                <ul className="list-disc list-inside text-blue-800">
+                  <li>画像を圧縮できます。</li>
+                  <li>アップロードは行われず、すべてブラウザで処理されます。</li>
+                  <li>一度に選択できる画像の最大枚数は3枚です</li>
+                </ul>
+              </div>
+            </div>
+          </div>
 
           <Card className="mb-8">
             <CardContent className="p-6">
